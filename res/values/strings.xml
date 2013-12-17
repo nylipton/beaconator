@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bluetooth Analyzer</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_label">Song Analysis Program</string>
+    <string name="menu_legalnotices">Legal Notices</string>
+    <string name="start_scanning">Start scanning</string>
+    <string name="stop_scanning">Stop scanning</string>
+    <string name="empty_msg">Start scanning in the menu to find Bluetooth devices</string>
+    <string name="addButtonText">add</string>
+    <string name="loadingButtonText">loading&#8230;</string>
+    <string name="removeButtonText">remove</string>
+    <string name="merchantLabelText">Merchant:</string>
+    <string name="addMerchantButton">+</string>
+    <string name="newMerchantMessage">new merchant:</string>
+	<string name="add">Add</string>
+	<string name="cancel">Cancel</string>
+	<string name="merchantDialogTitle">Enter merchant</string>
+	<string name="merchantEntryHint">new merchant name</string>
+	<string name="newMerchantMenuItemName">add merchant</string>
+	
+	<string name="tab_beacons">beacons</string>
+	<string name="tab_events">events</string>
+	<string name="tab_notifications">notifications</string>
+</resources>
