@@ -2,10 +2,11 @@ package com.example.bluetoothanalyzer;
 
 import java.util.UUID;
 
+import com.estimote.sdk.Beacon;
+import com.estimote.sdk.Utils;
+
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
-
-import com.radiusnetworks.ibeacon.IBeacon;
 
 /**
  * Represents either an iBeacon or a BluetoothDevice. Frankly I would do a better job abstracting this from those two except that
@@ -17,7 +18,7 @@ import com.radiusnetworks.ibeacon.IBeacon;
 @SuppressLint("DefaultLocale")
 public class FoundDevice
 {
-	private IBeacon iBeacon = null ;
+	private Beacon iBeacon = null ;
 	private BluetoothDevice btDevice = null ;
 	private DeviceType type ;
 	private static int testCountId = 0 ;
@@ -48,7 +49,7 @@ public class FoundDevice
 		this.type = DeviceType.TEST ;
 	}
 	
-	public FoundDevice( IBeacon iBeacon )
+	public FoundDevice( Beacon iBeacon )
 	{
 		this.setiBeacon( iBeacon ) ;
 		this.type = DeviceType.IBEACON ;
@@ -66,7 +67,7 @@ public class FoundDevice
 			return getBtDevice().getName( ) ;
 		else
 		{
-			String formattedUuidString = "", uuidString = getiBeacon().getProximityUuid( ) ;
+			String formattedUuidString = "", uuidString = Utils.normalizeProximityUUID( getiBeacon( ).proximityUUID ) ;
 			try {
 				UUID uuid = UUID.fromString( uuidString ) ;
 				formattedUuidString = uuid.toString( ) ;
@@ -87,12 +88,12 @@ public class FoundDevice
 		return type.toString( ) ;
 	}
 
-	public IBeacon getiBeacon()
+	public Beacon getiBeacon()
 	{
 		return iBeacon;
 	}
 
-	public void setiBeacon( IBeacon iBeacon )
+	public void setiBeacon( Beacon iBeacon )
 	{
 		this.iBeacon = iBeacon;
 	}

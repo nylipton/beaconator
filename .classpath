@@ -7,5 +7,11 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="/google-play-services_lib"/>
 	<classpathentry kind="lib" path="libs/firebase-client-jvm-LATEST.jar"/>
+	<classpathentry kind="lib" path="libs/estimote-sdk-preview.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://estimote.github.io/Android-SDK/JavaDocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/guava-15.0.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

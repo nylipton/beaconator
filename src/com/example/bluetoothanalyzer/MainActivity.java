@@ -1,7 +1,6 @@
 package com.example.bluetoothanalyzer;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -10,10 +9,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ListFragment;
-import android.content.Context;
+import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -28,15 +26,17 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.estimote.sdk.Beacon;
+import com.estimote.sdk.BeaconManager;
+import com.estimote.sdk.BeaconManager.RangingListener;
+import com.estimote.sdk.Region;
+import com.estimote.sdk.Utils;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-import com.radiusnetworks.ibeacon.IBeacon;
-import com.radiusnetworks.ibeacon.IBeaconConsumer;
-import com.radiusnetworks.ibeacon.IBeaconManager;
-import com.radiusnetworks.ibeacon.RangeNotifier;
-import com.radiusnetworks.ibeacon.Region;
+
 
 public class MainActivity 
 extends Activity
@@ -199,124 +199,128 @@ extends Activity
 	
 	public static class BeaconsFragment
 	extends ListFragment
-	implements IBeaconConsumer
 	{
-		/** scheduler to run non-UI items (like device scanning) */
-		private ExecutorService scheduler = Executors.newSingleThreadExecutor( ) ;
-		private IBeaconManager iBeaconManager ;
-		/** adapter of devices */
-		private BluetoothDeviceAdapter deviceAdapter ;
+		private static final int REQUEST_ENABLE_BT = 1234 ;
+		private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
+		private static final com.estimote.sdk.Region ALL_ESTIMOTE_BEACONS = new Region( ESTIMOTE_PROXIMITY_UUID, null, null ) ;
+		private BeaconManager beaconManager = null ;
+		private BluetoothDeviceAdapter deviceAdapter = null ;
 		
 		@Override
 		public void onCreate( Bundle savedInstanceState )
-		{
-			iBeaconManager = IBeaconManager.getInstanceForApplication( getActivity( ) ) ;
-			
+		{	
 			deviceAdapter = new BluetoothDeviceAdapter( getActivity( ), R.layout.list_mobile ) ;
-			deviceAdapter.add( FoundDevice.getTestDevice( ) ) ; //TODO remove this
-			deviceAdapter.add( FoundDevice.getTestDevice( ) ) ; //TODO remove this
 			setListAdapter( deviceAdapter ) ;
 			
-			iBeaconManager.bind( this );
+			beaconManager = new BeaconManager( getActivity( ) ) ;
+			beaconManager.setRangingListener( new RangingListener( )
+			{
+				
+				@Override
+				public void onBeaconsDiscovered( final Region region, final List<Beacon> beacons )
+				{
+					for( int i = 0 ; i < beacons.size( ) ; i++ )
+					{
+						Beacon beacon = beacons.get( i ) ;
+						if( BuildConfig.DEBUG )
+							Log.d( Consts.LOG, "I see an iBeacon " + Utils.computeAccuracy( beacon ) + " meters away."  ) ;
+						getActivity( ).runOnUiThread( new Runnable( )
+						{
+							public void run()
+							{
+								deviceAdapter.updateBeaconStatus( beacons, region ) ;
+							}
+						} );
+					}
+				}
+			} ) ;
+			
 			super.onCreate( savedInstanceState );
 		}
+		
+		@Override
+		public void onStart()
+		{
+			super.onStart( );
+
+			// Check if device supports Bluetooth Low Energy.
+			if ( !beaconManager.hasBluetooth( ) )
+			{
+				Toast.makeText( getActivity( ), "Device does not have Bluetooth Low Energy", Toast.LENGTH_LONG ).show( );
+				return;
+			}
+
+			// If Bluetooth is not enabled, let user enable it.
+			if ( !beaconManager.isBluetoothEnabled( ) )
+			{
+				Intent enableBtIntent = new Intent( BluetoothAdapter.ACTION_REQUEST_ENABLE );
+				startActivityForResult( enableBtIntent, REQUEST_ENABLE_BT );
+			}
+			else
+			{
+				connectToService( ) ;
+			}
+		}
+		
+		@Override
+		public void onActivityResult( int requestCode, int resultCode, Intent data )
+		{
+			if ( requestCode == REQUEST_ENABLE_BT )
+			{
+				if ( resultCode == Activity.RESULT_OK )
+				{
+					connectToService( );
+				}
+				else
+				{
+					Toast.makeText( getActivity( ), "Bluetooth not enabled", Toast.LENGTH_LONG ).show( );
+				}
+			}
+			super.onActivityResult( requestCode, resultCode, data );
+		}
+		
+		 private void connectToService()
+		{
+			beaconManager.connect( new BeaconManager.ServiceReadyCallback( )
+			{
+				
+				@Override
+				public void onServiceReady()
+				{
+					try
+					{
+						beaconManager.startRanging( ALL_ESTIMOTE_BEACONS );
+					}
+					catch( RemoteException e )
+					{
+						Toast.makeText(getActivity( ), "Cannot start ranging, something terrible happened", Toast.LENGTH_LONG).show();
+						if( BuildConfig.DEBUG)
+							Log.e(Consts.LOG, "Cannot start ranging", e);
+					}
+					
+				}
+			} );
+			
+		}
+
+		@Override
+		 public void onStop( ) 
+		 {
+		    try {
+		      beaconManager.stopRanging( ALL_ESTIMOTE_BEACONS ) ;
+		    } catch (RemoteException e) {
+		    	if( BuildConfig.DEBUG )
+		    		Log.d(Consts.LOG, "Error while stopping ranging", e ) ;
+		    }
+
+		    super.onStop();
+		  }
 
 		@Override
 		public void onDestroy()
 		{
-			iBeaconManager.unBind( this ) ;
+			beaconManager.disconnect( ) ;
 			super.onDestroy( );
-		}
-		
-		@Override
-		public void onIBeaconServiceConnect()
-		{
-			if( BuildConfig.DEBUG )
-				Log.i( Consts.LOG, "iBeacon service is running" ) ;
-				
-			iBeaconManager.setRangeNotifier( new RangeNotifier( )
-			{
-				@Override
-				public void didRangeBeaconsInRegion( final Collection<IBeacon> iBeacons, final Region region )
-				{
-					Iterator<IBeacon> iter = iBeacons.iterator( ) ;
-
-					while( iter.hasNext( ) )
-					{
-						IBeacon beacon = iter.next( ) ;
-						if( BuildConfig.DEBUG )
-							Log.d( Consts.LOG, "I see an iBeacon " + beacon.getAccuracy( ) + " meters away."  ) ;
-					}
-					getActivity( ).runOnUiThread( new Runnable( )
-					{
-						public void run()
-						{
-							deviceAdapter.updateBeaconStatus( iBeacons, region );
-						}
-					} );
-				}
-			} );
-			
-			scheduler.submit( new Runnable( )
-			{
-				public void run()
-				{
-					try {
-						iBeaconManager.startRangingBeaconsInRegion( new Region( "myMonitoringUniqueId", null, null, null ) );
-					} catch (RemoteException e) {   
-				    	Log.e( Consts.LOG, "exception starting to range beacons", e ) ;
-				    } 
-				}
-			} ) ;
-			
-//			iBeaconManager.setMonitorNotifier(new MonitorNotifier( )
-//			{
-//				
-//				@Override
-//				public void didExitRegion( Region region )
-//				{
-//					if( BuildConfig.DEBUG )
-//						Log.i( Consts.LOG, "I no longer see an iBeacon in region " + region ) ;
-//				}
-//				
-//				@Override
-//				public void didEnterRegion( Region region )
-//				{
-//					if( BuildConfig.DEBUG )
-//						Log.i( Consts.LOG, "I just saw an iBeacon in region " + region ) ;
-//				}
-//				
-//				@Override
-//				public void didDetermineStateForRegion( int state, Region region )
-//				{
-//					if( BuildConfig.DEBUG )
-//						Log.i( Consts.LOG, "I just switched from seeing/not seeing an iBeacon" ) ;
-//				}
-//			} ) ;
-//			 
-//			    try {
-//			        iBeaconManager.startMonitoringBeaconsInRegion( new Region( "myMonitoringUniqueId", null, null, null ) ) ;
-//			    } catch (RemoteException e) {   
-//			    	Log.e( Consts.LOG, e.toString( ) ) ;
-//			    } 
-		}
-
-		@Override
-		public Context getApplicationContext()
-		{
-			return getActivity( ).getApplicationContext( ) ;
-		}
-
-		@Override
-		public void unbindService( ServiceConnection connection )
-		{
-			getActivity( ).unbindService( connection );
-		}
-
-		@Override
-		public boolean bindService( Intent intent, ServiceConnection connection, int mode )
-		{
-			return getActivity( ).bindService( intent, connection, mode ) ;
 		}
 	}
 	

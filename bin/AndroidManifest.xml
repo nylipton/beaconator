@@ -28,25 +28,8 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.radiusnetworks.ibeacon.service.IBeaconService"
-            android:enabled="true"
-            android:exported="true"
-            android:isolatedProcess="false"
-            android:label="iBeacon" >
-        </service>
-        <service
-            android:name="com.radiusnetworks.ibeacon.IBeaconIntentProcessor"
-            android:enabled="true" >
-            <meta-data
-                android:name="background"
-                android:value="true" />
-
-            <intent-filter android:priority="1" >
-                <action android:name="com.example.bluetoothanalyzer.DID_RANGING" />
-                <action android:name="com.example.bluetoothanalyzer.DID_MONITORING" />
-            </intent-filter>
-        </service>
+	<service android:name="com.estimote.sdk.BeaconService"
+         android:exported="false"/>
 
     </application>
 

@@ -20,12 +20,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.estimote.sdk.Beacon;
+import com.estimote.sdk.Region;
+import com.estimote.sdk.Utils;
 import com.example.bluetoothanalyzer.FoundDevice.DeviceType;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.radiusnetworks.ibeacon.IBeacon;
-import com.radiusnetworks.ibeacon.Region;
 
 /**
  * Adapter that stores a list a BT devices. Frankly this should really create its own model instead of delving
@@ -38,8 +39,8 @@ extends ArrayAdapter<FoundDevice>
 {
 	private Map<BluetoothDevice, Integer> deviceRssiMap ;
 	private Map<BluetoothDevice, Byte[]> deviceScanRecordMap ;
-	/** Is this beacon saved in Firebase?*/
-	private Map<IBeacon, Boolean> beaconSaved ;
+	/** Is this beacon saved in Firebase? */
+	private Map<Beacon, Boolean> beaconSaved ;
 	
 	public BluetoothDeviceAdapter( Context context, int resource )
 	{
@@ -47,7 +48,7 @@ extends ArrayAdapter<FoundDevice>
 		
 		deviceRssiMap = new ConcurrentHashMap<BluetoothDevice, Integer>( ) ;
 		deviceScanRecordMap = new ConcurrentHashMap<BluetoothDevice, Byte[]>( ) ;
-		beaconSaved = new ConcurrentHashMap<IBeacon, Boolean>( ) ;
+		beaconSaved = new ConcurrentHashMap<Beacon, Boolean>( ) ;
 	}
 	
 	@Override
@@ -114,28 +115,28 @@ extends ArrayAdapter<FoundDevice>
 		return rowView ;
 	}
 
-	private String getBeaconLabelString( IBeacon iBeacon )
+	private String getBeaconLabelString( Beacon iBeacon )
 	{
 		StringBuffer sb = new StringBuffer( ) ;
-		sb.append( "major = " ).append( iBeacon.getMajor( ) ) ;
-		sb.append( ", minor = " ).append( iBeacon.getMinor( ) ) ;
+		sb.append( "major = " ).append( iBeacon.major ) ;
+		sb.append( ", minor = " ).append( iBeacon.minor ) ;
 		NumberFormat doubleFormat = NumberFormat.getNumberInstance( ) ;
 		doubleFormat.setMaximumFractionDigits( 2 ) ;
-		sb.append( "\napproximately " ).append( doubleFormat.format( iBeacon.getAccuracy( ) ) ).append( " feet away") ;
+		sb.append( "\napproximately " ).append( doubleFormat.format( Utils.computeAccuracy( iBeacon ) ) ).append( " meters away") ;
 		sb.append( "\nproximity category = ") ;
-		switch( iBeacon.getProximity( ) )
+		switch( Utils.computeProximity( iBeacon ) )
 		{
-			case IBeacon.PROXIMITY_FAR:
+			case FAR:
 				sb.append( "far" ) ; break ;
-			case IBeacon.PROXIMITY_IMMEDIATE:
+			case IMMEDIATE:
 				sb.append( "immediate" ) ; break ;
-			case IBeacon.PROXIMITY_NEAR:
+			case NEAR:
 				sb.append( "near" ) ; break ;
 			default:
 				sb.append(  "unknown" ) ;
 		}
-		sb.append( "\nrssi = " ).append( iBeacon.getRssi( ) ) ;
-		sb.append( ", tx power=" ).append( iBeacon.getTxPower( ) ) ;
+		sb.append( "\nrssi = " ).append( iBeacon.rssi ) ;
+		sb.append( ", tx power=" ).append( iBeacon.measuredPower ) ;
 		
 		return sb.toString( ) ;
 	}
@@ -194,7 +195,7 @@ extends ArrayAdapter<FoundDevice>
 		return( getPosition( new FoundDevice( device ) ) >= 0 ) ;
 	}
 	
-	public boolean isKnowniBeacon( IBeacon beacon )
+	public boolean isKnowniBeacon( Beacon beacon )
 	{
 		return( getPosition( new FoundDevice( beacon ) ) >= 0 ) ;
 	}
@@ -219,14 +220,14 @@ extends ArrayAdapter<FoundDevice>
 	 * @param iBeacons
 	 * @param region
 	 */
-	public void updateBeaconStatus( Collection<IBeacon> iBeacons, Region region )
+	public void updateBeaconStatus( Collection<Beacon> iBeacons, Region region )
 	{
-		Iterator<IBeacon> iter = iBeacons.iterator( ) ;
+		Iterator<Beacon> iter = iBeacons.iterator( ) ;
 		boolean dataChanged = false ;
 		while( iter.hasNext( ) )
 		{
 			// add this device to the adapter's list if it isn't already there
-			IBeacon b = iter.next( ) ;
+			Beacon b = iter.next( ) ;
 			FoundDevice newFD = new FoundDevice( b ) ;
 			int i = getPosition( newFD ) ;
 			if( i >= 0 ) //i.e. this is a known iBeacon
@@ -252,8 +253,8 @@ extends ArrayAdapter<FoundDevice>
 	class BeaconFBListener
 	implements ValueEventListener
 	{
-		private IBeacon b ;
-		BeaconFBListener( IBeacon b )
+		private Beacon b ;
+		BeaconFBListener( Beacon b )
 		{
 			this.b = b ;
 		}
