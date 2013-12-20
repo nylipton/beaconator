@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -65,13 +66,32 @@ extends Activity
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_events ).setTabListener( new FragmentTabListener<DummySectionFragment>( this, getText( R.string.tab_events ).toString( ), DummySectionFragment.class ) ) ) ;
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_notifications ).setTabListener( new FragmentTabListener<DummySectionFragment>( this, getText( R.string.tab_notifications ).toString( ), DummySectionFragment.class ) ) ) ;
 
-		Spinner merchantSpinner = ( Spinner ) actionBar.getCustomView( ).findViewById( R.id.merchantSpinner ) ;
+		final Spinner merchantSpinner = ( Spinner ) actionBar.getCustomView( ).findViewById( R.id.merchantSpinner ) ;
 		merchantSpinnerAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item ) ;
 		merchantSpinnerAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item ) ;
 		merchantSpinner.setAdapter( merchantSpinnerAdapter ) ;
 		FirebaseHelper.addMerchantsListener( new MerchantsListener( ) ); // will populate the merchants spinner
-		
-//		setContentView( R.layout.activity_main ) ;
+		merchantSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener( )
+		{
+			@Override
+			public void onItemSelected( AdapterView<?> parent, View view, int position, long id )
+			{
+				String merchantName = ( String ) merchantSpinner.getSelectedItem( ) ;
+				Fragment frag = getFragmentManager( ).findFragmentById( android.R.id.content ) ;
+				if( frag instanceof BeaconsFragment )
+				{
+					BeaconsFragment beaconFrag = ( BeaconsFragment ) frag ;
+					if( merchantSpinner != null && beaconFrag != null )
+						beaconFrag.setMerchant( merchantName ) ;
+				}
+			}
+
+			@Override
+			public void onNothingSelected( AdapterView<?> parent )
+			{
+				
+			}
+		} );
 	}
 	
 	@Override
@@ -160,13 +180,13 @@ extends Activity
 		@Override
 		public void onChildChanged( DataSnapshot arg0, String arg1 )
 		{
-			// TODO Auto-generated method stub
+			// TODO change the merchant name in the list
 		}
 
 		@Override
 		public void onChildMoved( DataSnapshot arg0, String arg1 )
 		{
-			// TODO Auto-generated method stub
+			// TODO When would this even happen?
 		}
 
 		@Override
@@ -238,6 +258,11 @@ extends Activity
 			super.onCreate( savedInstanceState );
 		}
 		
+		public void setMerchant( String merchantName )
+		{
+			deviceAdapter.setMerchant( merchantName ) ;
+		}
+
 		@Override
 		public void onStart()
 		{

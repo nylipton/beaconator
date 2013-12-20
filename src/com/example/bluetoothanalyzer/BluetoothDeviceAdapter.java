@@ -15,6 +15,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -41,6 +42,7 @@ extends ArrayAdapter<FoundDevice>
 	private Map<BluetoothDevice, Byte[]> deviceScanRecordMap ;
 	/** Is this beacon saved in Firebase? */
 	private Map<Beacon, Boolean> beaconSaved ;
+	private String selectedMerchantName = null ;
 	
 	public BluetoothDeviceAdapter( Context context, int resource )
 	{
@@ -97,7 +99,7 @@ extends ArrayAdapter<FoundDevice>
 		{
 			button.setVisibility( Button.VISIBLE ) ;
 			Boolean b = beaconSaved.get( device.getiBeacon( ) ) ;
-			if( b == null )
+			if( b == null ) 
 			{
 				button.setText( getContext( ).getString( R.string.loadingButtonText ) );
 				button.setEnabled( false );
@@ -108,6 +110,9 @@ extends ArrayAdapter<FoundDevice>
 				if( b.booleanValue( ) ) button.setText( getContext( ).getString( R.string.removeButtonText ) ) ;
 				else button.setText( getContext( ).getString( R.string.addButtonText ) ) ;
 			}
+			
+			if( !button.hasOnClickListeners( ) )
+				button.setOnClickListener( new BeaconButtonListener( device) ) ;
 		}
 		else
 			button.setVisibility( Button.INVISIBLE );
@@ -248,37 +253,36 @@ extends ArrayAdapter<FoundDevice>
 	/**
 	 * Listens for when the database's values have changed
 	 * @author daniellipton
-	 *
 	 */
 	class BeaconFBListener
 	implements ValueEventListener
 	{
-		private Beacon b ;
+		private Beacon beacon ;
 		BeaconFBListener( Beacon b )
 		{
-			this.b = b ;
+			this.beacon = b ;
 		}
 		
 		@Override
 		public void onCancelled( FirebaseError arg0 )
 		{
-			beaconSaved.put( b, null ) ;
+			beaconSaved.put( beacon, null ) ;
 			updateList( ) ;
 		}
 
 		@Override
 		public void onDataChange( DataSnapshot snapshot )
 		{
-			String s = snapshot.getValue( String.class ) ; 
+			Object s = snapshot.getValue( ) ; 
 			if( s == null )
 			{
-				Log.i( Consts.LOG, "no value for beacon " + b ) ;
-				beaconSaved.put( b, Boolean.FALSE ) ;
+				Log.i( Consts.LOG, "no value for beacon " + beacon ) ;
+				beaconSaved.put( beacon, Boolean.FALSE ) ;
 			}
 			else
 			{
 				Log.i( Consts.LOG, "beacon was put in the database" ) ;
-				beaconSaved.put( b, Boolean.TRUE ) ;
+				beaconSaved.put( beacon, Boolean.TRUE ) ;
 			}
 			
 			updateList( ) ;
@@ -293,5 +297,39 @@ extends ArrayAdapter<FoundDevice>
 				}
 			} ) ;
 		}
+	}
+	
+	/** Listener for buttons on beacon list items */
+	class BeaconButtonListener
+	implements OnClickListener
+	{
+		FoundDevice fd ;
+		
+		BeaconButtonListener( FoundDevice fd )
+		{
+			this.fd = fd ;
+		}
+		
+		@Override
+		public void onClick( View v )
+		{
+			Button button = ( Button ) v ;
+			if( button.getText( ).equals( v.getContext( ).getText( R.string.addButtonText ) ) )
+			{	
+				if( selectedMerchantName != null && fd.getiBeacon( ) != null )
+					FirebaseHelper.addBeacon( fd.getiBeacon( ), selectedMerchantName ) ;
+				else
+					Log.w( Consts.LOG, "Can't save beacon because something isn't set correctly." ) ;
+			}
+			else if( button.getText( ).equals( v.getContext( ).getText( R.string.removeButtonText ) ) )
+			{
+				FirebaseHelper.removeBeacon( fd.getiBeacon( ) ) ;
+			}
+		}
+	}
+
+	public void setMerchant( String merchantName )
+	{
+		this.selectedMerchantName = merchantName ;
 	}
 }

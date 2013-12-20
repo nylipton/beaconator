@@ -32,7 +32,7 @@ public class FirebaseHelper
 	}
 	
 	/**
-	 * Sticks the beacon into Firebase as <code>beacons/proximityUUID/major/minor</code> with the value of a timestamp
+	 * Sticks the beacon into Firebase as <code>beacons/proximityUUID/major/minor</code> with the value of a timestamp and the merchant
 	 * 
 	 * @param beacon the beacon to be added
 	 */
