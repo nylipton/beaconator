@@ -9,8 +9,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 
 /**
- * Represents either an iBeacon or a BluetoothDevice. Frankly I would do a better job abstracting this from those two except that
- * the responsability for doing that right belongs to the iBeacon class, so screw it.
+ * A device seen by bluetooth right now
  * 
  * @author daniellipton
  *

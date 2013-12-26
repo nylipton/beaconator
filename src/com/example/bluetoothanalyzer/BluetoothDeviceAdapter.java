@@ -1,17 +1,14 @@
 package com.example.bluetoothanalyzer;
 
-import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +20,6 @@ import android.widget.TextView;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
-import com.estimote.sdk.Utils;
-import com.example.bluetoothanalyzer.FoundDevice.DeviceType;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
@@ -36,10 +31,8 @@ import com.firebase.client.ValueEventListener;
  * @author daniellipton
  */
 public class BluetoothDeviceAdapter 
-extends ArrayAdapter<FoundDevice>
+extends ArrayAdapter<Device>
 {
-	private Map<BluetoothDevice, Integer> deviceRssiMap ;
-	private Map<BluetoothDevice, Byte[]> deviceScanRecordMap ;
 	/** Is this beacon saved in Firebase? */
 	private Map<Beacon, Boolean> beaconSaved ;
 	private String selectedMerchantName = null ;
@@ -47,9 +40,6 @@ extends ArrayAdapter<FoundDevice>
 	public BluetoothDeviceAdapter( Context context, int resource )
 	{
 		super( context, resource );
-		
-		deviceRssiMap = new ConcurrentHashMap<BluetoothDevice, Integer>( ) ;
-		deviceScanRecordMap = new ConcurrentHashMap<BluetoothDevice, Byte[]>( ) ;
 		beaconSaved = new ConcurrentHashMap<Beacon, Boolean>( ) ;
 	}
 	
@@ -75,7 +65,7 @@ extends ArrayAdapter<FoundDevice>
 		
 		
 		// device name
-		final FoundDevice device = getItem( position ) ;
+		final Device device = getItem( position ) ;
 		StringBuffer sb = new StringBuffer( ) ;
 		sb.append( device.getTypeString( ) ) ;
 		sb.append( ": " ) ;
@@ -83,22 +73,18 @@ extends ArrayAdapter<FoundDevice>
 		deviceLabel.setText( sb.toString( ) ) ;
 		
 		// device details
-		String detailsString = null ;
-		if( device.getType( ) == DeviceType.BT )
-			detailsString = getBTDeviceLabelString( device.getBtDevice( ) );
-		else if( device.getType( ) == DeviceType.IBEACON )
-			detailsString = getBeaconLabelString( device.getiBeacon( ) ) ;
-		else
-			detailsString = "This is a test device" ;
+		String detailsString = device.getLongDescription( ) ;
+
 		Log.d( Consts.LOG, detailsString ) ;
 		deviceDetailsLabel.setText( detailsString ) ;
 		
 		// list-item button
 		Button button = ( Button ) rowView.findViewById( R.id.beaconButton ) ;
-		if( device.getType( ) == DeviceType.IBEACON )
+		if( device instanceof DiscoveredBeaconDevice )
 		{
+			DiscoveredBeaconDevice bd = ( DiscoveredBeaconDevice ) device ;
 			button.setVisibility( Button.VISIBLE ) ;
-			Boolean b = beaconSaved.get( device.getiBeacon( ) ) ;
+			Boolean b = beaconSaved.get( bd.getBeacon( ) ) ;
 			if( b == null ) 
 			{
 				button.setText( getContext( ).getString( R.string.loadingButtonText ) );
@@ -112,7 +98,7 @@ extends ArrayAdapter<FoundDevice>
 			}
 			
 			if( !button.hasOnClickListeners( ) )
-				button.setOnClickListener( new BeaconButtonListener( device) ) ;
+				button.setOnClickListener( new BeaconButtonListener( bd ) ) ;
 		}
 		else
 			button.setVisibility( Button.INVISIBLE );
@@ -120,39 +106,13 @@ extends ArrayAdapter<FoundDevice>
 		return rowView ;
 	}
 
-	private String getBeaconLabelString( Beacon iBeacon )
-	{
-		StringBuffer sb = new StringBuffer( ) ;
-		sb.append( "major = " ).append( iBeacon.major ) ;
-		sb.append( ", minor = " ).append( iBeacon.minor ) ;
-		NumberFormat doubleFormat = NumberFormat.getNumberInstance( ) ;
-		doubleFormat.setMaximumFractionDigits( 2 ) ;
-		sb.append( "\napproximately " ).append( doubleFormat.format( Utils.computeAccuracy( iBeacon ) ) ).append( " meters away") ;
-		sb.append( "\nproximity category = ") ;
-		switch( Utils.computeProximity( iBeacon ) )
-		{
-			case FAR:
-				sb.append( "far" ) ; break ;
-			case IMMEDIATE:
-				sb.append( "immediate" ) ; break ;
-			case NEAR:
-				sb.append( "near" ) ; break ;
-			default:
-				sb.append(  "unknown" ) ;
-		}
-		sb.append( "\nrssi = " ).append( iBeacon.rssi ) ;
-		sb.append( ", tx power=" ).append( iBeacon.measuredPower ) ;
-		
-		return sb.toString( ) ;
-	}
-
-	private String getBTDeviceLabelString( BluetoothDevice device )
-	{
-		StringBuffer sb = new StringBuffer( ) ;
-		// rssi and scan record
-		Integer rssi = deviceRssiMap.get( device ) ;
-		if( rssi != null )
-			sb.append( "rssi=" ).append(  rssi ).append( "\n" ) ;
+//	private String getBTDeviceLabelString( BluetoothDevice device )
+//	{
+//		StringBuffer sb = new StringBuffer( ) ;
+//		// rssi and scan record
+//		Integer rssi = deviceRssiMap.get( device ) ;
+//		if( rssi != null )
+//			sb.append( "rssi=" ).append(  rssi ).append( "\n" ) ;
 //		Byte[] scanRecordArray = deviceScanRecordMap.get( device ) ;
 //		if( scanRecordArray != null )
 //		{
@@ -187,37 +147,31 @@ extends ArrayAdapter<FoundDevice>
 //			if( pIter.hasNext( ) )
 //				sb.append( "\n" ) ;
 //		}
-		ParcelUuid[] pUUIDArray = device.getUuids( ) ;
-		if( pUUIDArray != null )
-			for( int i = 0 ; i < pUUIDArray.length ; i++ )
-				sb.append( "uuid " ).append( i ).append(  " = " ).append(  pUUIDArray[i] ).append( "\n" ) ;
-		return sb.toString( ) ;
-	}
-
-	/** Is this a known BluetoothDevice? */
-	public boolean isKnownDevice( BluetoothDevice device )
-	{
-		return( getPosition( new FoundDevice( device ) ) >= 0 ) ;
-	}
+//		ParcelUuid[] pUUIDArray = device.getUuids( ) ;
+//		if( pUUIDArray != null )
+//			for( int i = 0 ; i < pUUIDArray.length ; i++ )
+//				sb.append( "uuid " ).append( i ).append(  " = " ).append(  pUUIDArray[i] ).append( "\n" ) ;
+//		return sb.toString( ) ;
+//	}
 	
 	public boolean isKnowniBeacon( Beacon beacon )
 	{
-		return( getPosition( new FoundDevice( beacon ) ) >= 0 ) ;
+		return( getPosition( new DiscoveredBeaconDevice( beacon ) ) >= 0 ) ;
 	}
 
 	/** Updates a found BT device's rssi and scan record.<p>THIS MUST BE CALLED BY THE MAIN UI THREAD */
-	public void updateDeviceStatus( BluetoothDevice device, int rssi, byte[] scanRecord )
-	{
-		int i = 0 ;
-		Byte[] bytes = new Byte[scanRecord.length] ;
-		for( byte b : scanRecord )
-			bytes[i++] = b ;
-		
-		deviceScanRecordMap.put( device, bytes ) ;
-		deviceRssiMap.put( device, Integer.valueOf( rssi ) ) ;
-		
-		notifyDataSetChanged( ) ;
-	}
+//	public void updateDeviceStatus( BluetoothDevice device, int rssi, byte[] scanRecord )
+//	{
+//		int i = 0 ;
+//		Byte[] bytes = new Byte[scanRecord.length] ;
+//		for( byte b : scanRecord )
+//			bytes[i++] = b ;
+//		
+//		deviceScanRecordMap.put( device, bytes ) ;
+//		deviceRssiMap.put( device, Integer.valueOf( rssi ) ) ;
+//		
+//		notifyDataSetChanged( ) ;
+//	}
 	
 	/** 
 	 * Will update a discovered iBeacon's status or just add it to the list of it's not there yet.<p>
@@ -233,17 +187,17 @@ extends ArrayAdapter<FoundDevice>
 		{
 			// add this device to the adapter's list if it isn't already there
 			Beacon b = iter.next( ) ;
-			FoundDevice newFD = new FoundDevice( b ) ;
-			int i = getPosition( newFD ) ;
+			DiscoveredBeaconDevice newBeacon = new DiscoveredBeaconDevice( b ) ;
+			int i = getPosition( newBeacon ) ;
 			if( i >= 0 ) //i.e. this is a known iBeacon
 			{
-				getItem( i ).setiBeacon( b );
+				( ( DiscoveredBeaconDevice ) getItem( i ) ).setBeacon( b ) ;
 				dataChanged = true ;
 			}
 			else
 			{
 				FirebaseHelper.addBeaconValueListener( b, new BeaconFBListener( b ) ) ;
-				add( newFD ) ;
+				add( newBeacon ) ;
 			}
 		}
 		if( dataChanged )
@@ -303,9 +257,9 @@ extends ArrayAdapter<FoundDevice>
 	class BeaconButtonListener
 	implements OnClickListener
 	{
-		FoundDevice fd ;
+		DiscoveredBeaconDevice fd ;
 		
-		BeaconButtonListener( FoundDevice fd )
+		BeaconButtonListener( DiscoveredBeaconDevice fd )
 		{
 			this.fd = fd ;
 		}
@@ -316,14 +270,14 @@ extends ArrayAdapter<FoundDevice>
 			Button button = ( Button ) v ;
 			if( button.getText( ).equals( v.getContext( ).getText( R.string.addButtonText ) ) )
 			{	
-				if( selectedMerchantName != null && fd.getiBeacon( ) != null )
-					FirebaseHelper.addBeacon( fd.getiBeacon( ), selectedMerchantName ) ;
+				if( selectedMerchantName != null && fd.getBeacon( ) != null )
+					FirebaseHelper.addBeacon( fd.getBeacon( ), selectedMerchantName ) ;
 				else
 					Log.w( Consts.LOG, "Can't save beacon because something isn't set correctly." ) ;
 			}
 			else if( button.getText( ).equals( v.getContext( ).getText( R.string.removeButtonText ) ) )
 			{
-				FirebaseHelper.removeBeacon( fd.getiBeacon( ) ) ;
+				FirebaseHelper.removeBeacon( fd.getBeacon( ) ) ;
 			}
 		}
 	}
@@ -331,5 +285,7 @@ extends ArrayAdapter<FoundDevice>
 	public void setMerchant( String merchantName )
 	{
 		this.selectedMerchantName = merchantName ;
+		
+		// remove all of the old beacons for this merchant from this list
 	}
 }

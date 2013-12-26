@@ -1,6 +1,5 @@
 package com.example.bluetoothanalyzer;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -8,12 +7,8 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.ListFragment;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,16 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.estimote.sdk.Beacon;
-import com.estimote.sdk.BeaconManager;
-import com.estimote.sdk.BeaconManager.RangingListener;
-import com.estimote.sdk.Region;
-import com.estimote.sdk.Utils;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
 
 
 public class MainActivity 
@@ -70,28 +55,8 @@ extends Activity
 		merchantSpinnerAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item ) ;
 		merchantSpinnerAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item ) ;
 		merchantSpinner.setAdapter( merchantSpinnerAdapter ) ;
-		FirebaseHelper.addMerchantsListener( new MerchantsListener( ) ); // will populate the merchants spinner
-		merchantSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener( )
-		{
-			@Override
-			public void onItemSelected( AdapterView<?> parent, View view, int position, long id )
-			{
-				String merchantName = ( String ) merchantSpinner.getSelectedItem( ) ;
-				Fragment frag = getFragmentManager( ).findFragmentById( android.R.id.content ) ;
-				if( frag instanceof BeaconsFragment )
-				{
-					BeaconsFragment beaconFrag = ( BeaconsFragment ) frag ;
-					if( merchantSpinner != null && beaconFrag != null )
-						beaconFrag.setMerchant( merchantName ) ;
-				}
-			}
-
-			@Override
-			public void onNothingSelected( AdapterView<?> parent )
-			{
-				
-			}
-		} );
+		FirebaseHelper.addMerchantsListener( new MerchantsListener( this, merchantSpinnerAdapter) ); // will populate the merchants spinner
+		merchantSpinner.setOnItemSelectedListener( new MerchantSpinnerItemSelectedListener( merchantSpinner ) );
 	}
 	
 	@Override
@@ -102,7 +67,7 @@ extends Activity
 		return super.onCreateOptionsMenu( menu ) ;
 	}
 	 
-	 /** Callback on the menu item to add a new merchant */
+	 /**  add a new merchant - called by the menu overflow button */
 	 public void addMerchant( MenuItem menuItem )
 	 {
 		final AlertDialog.Builder builder = new AlertDialog.Builder( this ) ;
@@ -142,66 +107,6 @@ extends Activity
 	 }
 
 	
-	/**
-	 * Listeners for when there are merchants for the spinner from the backend database
-	 * @author daniellipton
-	 *
-	 */
-	class MerchantsListener
-	implements ChildEventListener
-	{
-
-		@Override
-		public void onCancelled( FirebaseError arg0 )
-		{
-			MainActivity.this.runOnUiThread( new Runnable( )
-			{
-				public void run()
-				{
-					merchantSpinnerAdapter.clear( );
-				}
-			} );
-		}
-
-		@Override
-		public void onChildAdded( final DataSnapshot ds, String previousChildName )
-		{
-			Log.i( Consts.LOG, "added a new merchant: " + ds.getValue( String.class ) ) ;
-			MainActivity.this.runOnUiThread( new Runnable( )
-			{
-				public void run()
-				{
-					merchantSpinnerAdapter.add( ds.getValue( String.class) );
-				}
-			} );
-			
-		}
-
-		@Override
-		public void onChildChanged( DataSnapshot arg0, String arg1 )
-		{
-			// TODO change the merchant name in the list
-		}
-
-		@Override
-		public void onChildMoved( DataSnapshot arg0, String arg1 )
-		{
-			// TODO When would this even happen?
-		}
-
-		@Override
-		public void onChildRemoved( final DataSnapshot ds )
-		{
-			MainActivity.this.runOnUiThread( new Runnable( )
-			{
-				public void run()
-				{
-					merchantSpinnerAdapter.remove( ds.getValue( ).toString( ) );
-				}
-			} );
-		}
-	}
-
 	@Override
 	protected void onRestoreInstanceState( Bundle savedInstanceState ) 
 	{
@@ -217,138 +122,35 @@ extends Activity
 		outState.putInt( STATE_SELECTED_NAVIGATION_ITEM, getActionBar( ).getSelectedNavigationIndex( ) );
 	}
 	
-	public static class BeaconsFragment
-	extends ListFragment
+	/** Listens for when the merchant spinner has selected a new merchant */
+	private final class MerchantSpinnerItemSelectedListener 
+	implements AdapterView.OnItemSelectedListener
 	{
-		private static final int REQUEST_ENABLE_BT = 1234 ;
-		private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
-		private static final com.estimote.sdk.Region ALL_ESTIMOTE_BEACONS = new Region( ESTIMOTE_PROXIMITY_UUID, null, null ) ;
-		private BeaconManager beaconManager = null ;
-		private BluetoothDeviceAdapter deviceAdapter = null ;
-		
-		@Override
-		public void onCreate( Bundle savedInstanceState )
-		{	
-			deviceAdapter = new BluetoothDeviceAdapter( getActivity( ), R.layout.list_mobile ) ;
-			setListAdapter( deviceAdapter ) ;
-			
-			beaconManager = new BeaconManager( getActivity( ) ) ;
-			beaconManager.setRangingListener( new RangingListener( )
-			{
-				
-				@Override
-				public void onBeaconsDiscovered( final Region region, final List<Beacon> beacons )
-				{
-					for( int i = 0 ; i < beacons.size( ) ; i++ )
-					{
-						Beacon beacon = beacons.get( i ) ;
-						if( BuildConfig.DEBUG )
-							Log.d( Consts.LOG, "I see an iBeacon " + Utils.computeAccuracy( beacon ) + " meters away."  ) ;
-						getActivity( ).runOnUiThread( new Runnable( )
-						{
-							public void run()
-							{
-								deviceAdapter.updateBeaconStatus( beacons, region ) ;
-							}
-						} );
-					}
-				}
-			} ) ;
-			
-			super.onCreate( savedInstanceState );
-		}
-		
-		public void setMerchant( String merchantName )
+		private final Spinner merchantSpinner;
+
+		private MerchantSpinnerItemSelectedListener( Spinner merchantSpinner )
 		{
-			deviceAdapter.setMerchant( merchantName ) ;
+			this.merchantSpinner = merchantSpinner;
 		}
 
 		@Override
-		public void onStart()
+		public void onItemSelected( AdapterView<?> parent, View view, int position, long id )
 		{
-			super.onStart( );
-
-			// Check if device supports Bluetooth Low Energy.
-			if ( !beaconManager.hasBluetooth( ) )
+			String merchantName = ( String ) merchantSpinner.getSelectedItem( ) ;
+			Fragment frag = getFragmentManager( ).findFragmentById( android.R.id.content ) ;
+			if( frag instanceof BeaconsFragment )
 			{
-				Toast.makeText( getActivity( ), "Device does not have Bluetooth Low Energy", Toast.LENGTH_LONG ).show( );
-				return;
+				BeaconsFragment beaconFrag = ( BeaconsFragment ) frag ;
+				if( merchantSpinner != null && beaconFrag != null )
+					beaconFrag.setMerchant( merchantName ) ;
 			}
-
-			// If Bluetooth is not enabled, let user enable it.
-			if ( !beaconManager.isBluetoothEnabled( ) )
-			{
-				Intent enableBtIntent = new Intent( BluetoothAdapter.ACTION_REQUEST_ENABLE );
-				startActivityForResult( enableBtIntent, REQUEST_ENABLE_BT );
-			}
-			else
-			{
-				connectToService( ) ;
-			}
-		}
-		
-		@Override
-		public void onActivityResult( int requestCode, int resultCode, Intent data )
-		{
-			if ( requestCode == REQUEST_ENABLE_BT )
-			{
-				if ( resultCode == Activity.RESULT_OK )
-				{
-					connectToService( );
-				}
-				else
-				{
-					Toast.makeText( getActivity( ), "Bluetooth not enabled", Toast.LENGTH_LONG ).show( );
-				}
-			}
-			super.onActivityResult( requestCode, resultCode, data );
-		}
-		
-		 private void connectToService()
-		{
-			beaconManager.connect( new BeaconManager.ServiceReadyCallback( )
-			{
-				
-				@Override
-				public void onServiceReady()
-				{
-					try
-					{
-						beaconManager.startRanging( ALL_ESTIMOTE_BEACONS );
-					}
-					catch( RemoteException e )
-					{
-						Toast.makeText(getActivity( ), "Cannot start ranging, something terrible happened", Toast.LENGTH_LONG).show();
-						if( BuildConfig.DEBUG)
-							Log.e(Consts.LOG, "Cannot start ranging", e);
-					}
-					
-				}
-			} );
-			
+			else if( BuildConfig.DEBUG )
+				Log.w( Consts.LOG, "Couldn't find the BeaconsFragment for some reason!" ) ;
 		}
 
-		@Override
-		 public void onStop( ) 
-		 {
-		    try {
-		      beaconManager.stopRanging( ALL_ESTIMOTE_BEACONS ) ;
-		    } catch (RemoteException e) {
-		    	if( BuildConfig.DEBUG )
-		    		Log.d(Consts.LOG, "Error while stopping ranging", e ) ;
-		    }
-
-		    super.onStop();
-		  }
-
-		@Override
-		public void onDestroy()
-		{
-			beaconManager.disconnect( ) ;
-			super.onDestroy( );
-		}
+		public void onNothingSelected( AdapterView<?> parent ) { } // one merchant should always be selected - hide beacons?
 	}
-	
+
 	public static class DummySectionFragment extends Fragment 
 	{
 	    @Override
@@ -356,7 +158,7 @@ extends Activity
 	    {
 	      TextView textView = new TextView(getActivity());
 	      textView.setGravity(Gravity.CENTER);
-	      textView.setText( "placeholder_text" ) ;
+	      textView.setText( "placeholder text" ) ;
 	      return textView;
 	    }
 	  }

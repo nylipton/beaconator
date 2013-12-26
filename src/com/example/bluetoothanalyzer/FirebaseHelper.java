@@ -14,13 +14,18 @@ public class FirebaseHelper
 {
 	/** 
 	 * Date format for the datetime this beacon was added into Firebase
+	 * @see #CREATED_KEYCREATED
 	 */
 	public final static DateFormat dateFormat = DateFormat.getDateTimeInstance( ) ;
 	
 	private final static String FIREBASE_URL = "https://beacon-test.firebaseio.com/" ;
+	/** parent for all merchants */
 	private final static String MERCHANT_NODE = "merchants" ;
+	/** parent for all beacons */
 	private final static String BEACONS_NODE = "beacons" ;
+	/** key for key/val hash that goes in a beacon under minor to represent the merchant */
 	private final static String MERCHANT_KEY = "merchant" ;
+	/** key for key/val hash that goes in a beacon under minor to represent the created timestamp */
 	private final static String CREATED_KEY = "created" ;
 	
 	public static Firebase getBeaconNode( Beacon beacon )
@@ -29,6 +34,13 @@ public class FirebaseHelper
 			throw new IllegalArgumentException( "can't pass null beacon" ) ;
 		Firebase fbBeaconsRef = new Firebase( FIREBASE_URL ) ;
 		return fbBeaconsRef.child( BEACONS_NODE ).child( beacon.proximityUUID ).child( Integer.toString( beacon.major ) ).child( Integer.toString( beacon.minor ) ) ;
+	}
+	
+	/** Adds a listener for all of the beacons in the database */
+	public static void addBeaconParentListener( ChildEventListener listener )
+	{
+		Firebase fbBeaconsRef = new Firebase( FIREBASE_URL ).child(  BEACONS_NODE ) ;
+		fbBeaconsRef.addChildEventListener( listener ) ;
 	}
 	
 	/**
