@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <TextView 
+        android:id="@+id/beaconName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold" 
+     />
+    <TextView 
+        android:id="@+id/beaconDetails"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/beaconName"
+        android:layout_alignParentLeft="true"
+     />
+    <LinearLayout 
+       android:orientation="horizontal" 
+       style="?android:attr/buttonBarStyle"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:layout_below="@id/beaconDetails"
+       android:layout_alignParentLeft="true"
+       >
+       
+		<Button 
+		 android:id="@+id/nearBtn"
+		 android:layout_height="wrap_content"
+		 android:layout_width="wrap_content"
+		 style="?android:attr/buttonBarButtonStyle"
+		 android:text="@string/nearBtnTitle"
+		 />
+	    <Button 
+	        android:id="@+id/immediateBtn"
+	        android:layout_height="wrap_content"
+	        android:layout_width="wrap_content"
+	        style="?android:attr/buttonBarButtonStyle"
+	        android:text="@string/immediateBtnTitle"
+	        />
+	    <Button
+	        android:id="@+id/farBtn"
+	        android:layout_height="wrap_content"
+	        android:layout_width="wrap_content"
+	        style="?android:attr/buttonBarButtonStyle"
+	        android:text="@string/farBtnTitle"
+	        />
+    </LinearLayout>
+</RelativeLayout>

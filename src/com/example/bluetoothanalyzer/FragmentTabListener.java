@@ -6,32 +6,33 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 
-public class FragmentTabListener<T extends Fragment> implements TabListener
+public class FragmentTabListener<T extends Fragment> 
+implements TabListener
 {
 
-	private final Activity myActivity;
-	private final String myTag;
-	private final Class<T> myClass;
+	private final Activity activity;
+	private final String tabName;
+	private final Class<T> clazz;
 
 	public FragmentTabListener( Activity activity, String tag, Class<T> cls )
 	{
-		myActivity = activity;
-		myTag = tag;
-		myClass = cls;
+		this.activity = activity;
+		tabName = tag;
+		clazz = cls;
 	}
 
 	@Override
 	public void onTabSelected( Tab tab, FragmentTransaction ft )
 	{
 
-		Fragment myFragment = myActivity.getFragmentManager( ).findFragmentByTag( myTag );
+		Fragment myFragment = activity.getFragmentManager( ).findFragmentByTag( tabName );
 
 		// Check if the fragment is already initialized
 		if ( myFragment == null )
 		{
 			// If not, instantiate and add it to the activity
-			myFragment = Fragment.instantiate( myActivity, myClass.getName( ) );
-			ft.add( android.R.id.content, myFragment, myTag );
+			myFragment = Fragment.instantiate( activity, clazz.getName( ) );
+			ft.add( android.R.id.content, myFragment, tabName );
 		}
 		else
 		{
@@ -45,8 +46,7 @@ public class FragmentTabListener<T extends Fragment> implements TabListener
 	public void onTabUnselected( Tab tab, FragmentTransaction ft )
 	{
 
-		Fragment myFragment = myActivity.getFragmentManager( )
-				.findFragmentByTag( myTag );
+		Fragment myFragment = activity.getFragmentManager( ).findFragmentByTag( tabName );
 
 		if ( myFragment != null )
 		{

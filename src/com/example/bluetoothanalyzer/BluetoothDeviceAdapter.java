@@ -6,7 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -16,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.estimote.sdk.Beacon;
@@ -34,13 +37,13 @@ public class BluetoothDeviceAdapter
 extends ArrayAdapter<Device>
 {
 	/** Is this beacon saved in Firebase? */
-	private Map<Beacon, Boolean> beaconSaved ;
+	private Map<DiscoveredBeaconDevice, Boolean> beaconSaved ;
 	private String selectedMerchantName = null ;
 	
 	public BluetoothDeviceAdapter( Context context, int resource )
 	{
 		super( context, resource );
-		beaconSaved = new ConcurrentHashMap<Beacon, Boolean>( ) ;
+		beaconSaved = new ConcurrentHashMap<DiscoveredBeaconDevice, Boolean>( ) ;
 	}
 	
 	@Override
@@ -75,7 +78,8 @@ extends ArrayAdapter<Device>
 		// device details
 		String detailsString = device.getLongDescription( ) ;
 
-		Log.d( Consts.LOG, detailsString ) ;
+		if( BuildConfig.DEBUG )
+			Log.v( Consts.LOG, detailsString ) ;
 		deviceDetailsLabel.setText( detailsString ) ;
 		
 		// list-item button
@@ -84,7 +88,7 @@ extends ArrayAdapter<Device>
 		{
 			DiscoveredBeaconDevice bd = ( DiscoveredBeaconDevice ) device ;
 			button.setVisibility( Button.VISIBLE ) ;
-			Boolean b = beaconSaved.get( bd.getBeacon( ) ) ;
+			Boolean b = beaconSaved.get( bd ) ;
 			if( b == null ) 
 			{
 				button.setText( getContext( ).getString( R.string.loadingButtonText ) );
@@ -196,7 +200,8 @@ extends ArrayAdapter<Device>
 			}
 			else
 			{
-				FirebaseHelper.addBeaconValueListener( b, new BeaconFBListener( b ) ) ;
+				BeaconFBListener listener = new BeaconFBListener( newBeacon ) ;
+				FirebaseHelper.addBeaconValueListener( b, listener )  ;
 				add( newBeacon ) ;
 			}
 		}
@@ -211,8 +216,9 @@ extends ArrayAdapter<Device>
 	class BeaconFBListener
 	implements ValueEventListener
 	{
-		private Beacon beacon ;
-		BeaconFBListener( Beacon b )
+		private DiscoveredBeaconDevice beacon ;
+		
+		BeaconFBListener( DiscoveredBeaconDevice b )
 		{
 			this.beacon = b ;
 		}
@@ -230,7 +236,7 @@ extends ArrayAdapter<Device>
 			Object s = snapshot.getValue( ) ; 
 			if( s == null )
 			{
-				Log.i( Consts.LOG, "no value for beacon " + beacon ) ;
+				Log.i( Consts.LOG, "no value for beacon - it wasn't in the database"  ) ;
 				beaconSaved.put( beacon, Boolean.FALSE ) ;
 			}
 			else
@@ -271,7 +277,7 @@ extends ArrayAdapter<Device>
 			if( button.getText( ).equals( v.getContext( ).getText( R.string.addButtonText ) ) )
 			{	
 				if( selectedMerchantName != null && fd.getBeacon( ) != null )
-					FirebaseHelper.addBeacon( fd.getBeacon( ), selectedMerchantName ) ;
+					showBeaconNameDialog( fd.getBeacon( ), selectedMerchantName ) ;
 				else
 					Log.w( Consts.LOG, "Can't save beacon because something isn't set correctly." ) ;
 			}
@@ -280,9 +286,44 @@ extends ArrayAdapter<Device>
 				FirebaseHelper.removeBeacon( fd.getBeacon( ) ) ;
 			}
 		}
+		
+		/**  add a new merchant - called by the menu overflow button */
+		 public void showBeaconNameDialog( final Beacon beacon, final String selectedMerchantName )
+		 {
+			 Context context = BluetoothDeviceAdapter.this.getContext( ) ;
+			final AlertDialog.Builder builder = new AlertDialog.Builder( context ) ;
+			
+			LayoutInflater inflater = ( LayoutInflater ) getContext( ).getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+			builder.setView( inflater.inflate( R.layout.beacon_name_entry_dialog, null ) ) ;
+			builder.setTitle( context.getString( R.string.beaconNameDialogTitle ) ) ;
+			builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() 
+			{
+			    public void onClick( DialogInterface dialog, int id ) 
+			    {
+			    	AlertDialog alertDialog = ( AlertDialog ) dialog ;
+			    	EditText beaconInput = ( EditText ) alertDialog.findViewById( R.id.beaconNameDialogField ) ;
+			    	Object o = beaconInput.getText( ) ;
+			        final String beaconName = o.toString( ) ;
+			        if( beaconName != null && beaconName.length( ) > 0 )
+			        {
+				        //TODO get this off the GUI thread
+			        	FirebaseHelper.addBeacon( beacon, selectedMerchantName, beaconName ) ;
+			        }
+			    }
+			});
+			builder.setNegativeButton( R.string.cancel, new DialogInterface.OnClickListener( )
+			{
+				public void onClick( DialogInterface dialog, int which )
+				{
+					dialog.cancel( ); 
+				}
+			} ) ;
+
+			builder.show( ) ;
+		 }
 	}
 
-	public void setMerchant( String merchantName )
+	public void setMerchant( final String merchantName )
 	{
 		this.selectedMerchantName = merchantName ;
 		

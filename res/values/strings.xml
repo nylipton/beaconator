@@ -16,11 +16,21 @@
     <string name="newMerchantMessage">new merchant:</string>
 	<string name="add">Add</string>
 	<string name="cancel">Cancel</string>
-	<string name="merchantDialogTitle">Enter merchant</string>
+	<string name="merchantDialogTitle">Enter Merchant</string>
 	<string name="merchantEntryHint">new merchant name</string>
 	<string name="newMerchantMenuItemName">add merchant</string>
 	
 	<string name="tab_beacons">beacons</string>
-	<string name="tab_events">events</string>
+	<string name="tab_events">sequences</string>
 	<string name="tab_notifications">notifications</string>
+	
+	<string name="beaconNameEntryHint">beacon name</string>
+	<string name="beaconNameDialogTitle">Enter Beacon Name</string>
+	
+	<string name="sequenceNameEntryHint">sequence name</string>
+	<string name="saveBtnTitle">Save</string>
+	<string name="newBtnTitle">New</string>
+	<string name="farBtnTitle">Far</string>
+	<string name="immediateBtnTitle">Immediate</string>
+	<string name="nearBtnTitle">Near</string>
 </resources>

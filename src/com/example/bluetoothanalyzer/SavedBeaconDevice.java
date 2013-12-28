@@ -14,16 +14,16 @@ import com.estimote.sdk.Utils;
 public class SavedBeaconDevice 
 implements Device
 {
-	@SuppressWarnings("unused")
-	private String uuid, merchant ;
+	private String uuid, merchant, name ;
 	private int  major, minor ;
 	
-	public SavedBeaconDevice( String uuid, int major, int minor, String merchant )
+	public SavedBeaconDevice( String uuid, int major, int minor, String merchant, String name )
 	{
 		this.uuid = uuid ;
 		this.major = major ;
 		this.minor = minor ;
 		this.merchant = merchant ;
+		this.name = name ;
 	}
 	
 	@Override
@@ -33,17 +33,23 @@ implements Device
 	}
 
 	@Override
+	/**
+	 * just the nickname
+	 */
 	public String getName()
 	{
-		return Utils.normalizeProximityUUID( uuid ) ;
+		return name ;
 	}
 
 	@Override
+	/**
+	 * nickname: uuid/major/minor
+	 */
 	public String getLongDescription()
 	{
 		StringBuffer sb = new StringBuffer( ) ;
-		sb.append( "major = " ).append( major ) ;
-		sb.append( ", minor = " ).append( minor ) ;
+		sb.append( Utils.normalizeProximityUUID( uuid ) ) ;
+		sb.append( " / major=" ).append( major ).append( " / minor=" ).append( minor ) ;
 		return sb.toString( ) ;
 	}
 
@@ -77,5 +83,10 @@ implements Device
 				&& beacon.getBeacon( ).proximityUUID.equals( this.uuid )
 				&& beacon.getBeacon( ).major == this.major
 				&& beacon.getBeacon( ).minor == this.minor ) ;
+	}
+	
+	public String getMerchant( )
+	{
+		return merchant ;
 	}
 }

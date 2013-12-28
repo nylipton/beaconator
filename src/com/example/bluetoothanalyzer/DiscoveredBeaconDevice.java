@@ -15,6 +15,7 @@ public class DiscoveredBeaconDevice
 implements Device
 {
 	private Beacon beacon ;
+	private String merchant ;
 	
 	public DiscoveredBeaconDevice( Beacon beacon )
 	{
@@ -37,6 +38,8 @@ implements Device
 	public String getLongDescription()
 	{
 		StringBuffer sb = new StringBuffer( ) ;
+		if( getMerchant( ) != null )
+			sb.append( getMerchant( ) ).append( "\n" ) ;
 		sb.append( "major = " ).append( beacon.major ) ;
 		sb.append( ", minor = " ).append( beacon.minor ) ;
 		NumberFormat doubleFormat = NumberFormat.getNumberInstance( ) ;
@@ -83,5 +86,15 @@ implements Device
 	public int hashCode()
 	{
 		return getBeacon( ).hashCode( ) ;
+	}
+
+	public String getMerchant()
+	{
+		return merchant;
+	}
+
+	public void setMerchant( String merchant )
+	{
+		this.merchant = merchant;
 	}
 }

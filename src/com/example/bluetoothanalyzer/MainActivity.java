@@ -48,14 +48,14 @@ extends Activity
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME ) ;
 		actionBar.setNavigationMode( ActionBar.NAVIGATION_MODE_TABS ) ;
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_beacons ).setTabListener( new FragmentTabListener<BeaconsFragment>( this, getText( R.string.tab_beacons ).toString( ), BeaconsFragment.class ) ) ) ;
-		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_events ).setTabListener( new FragmentTabListener<DummySectionFragment>( this, getText( R.string.tab_events ).toString( ), DummySectionFragment.class ) ) ) ;
+		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_events ).setTabListener( new FragmentTabListener<SequencesFragment>( this, getText( R.string.tab_events ).toString( ), SequencesFragment.class ) ) ) ;
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_notifications ).setTabListener( new FragmentTabListener<DummySectionFragment>( this, getText( R.string.tab_notifications ).toString( ), DummySectionFragment.class ) ) ) ;
 
 		final Spinner merchantSpinner = ( Spinner ) actionBar.getCustomView( ).findViewById( R.id.merchantSpinner ) ;
 		merchantSpinnerAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item ) ;
 		merchantSpinnerAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item ) ;
 		merchantSpinner.setAdapter( merchantSpinnerAdapter ) ;
-		FirebaseHelper.addMerchantsListener( new MerchantsListener( this, merchantSpinnerAdapter) ); // will populate the merchants spinner
+		FirebaseHelper.addMerchantsListener( new MerchantsFirebaseListener( this, merchantSpinnerAdapter) ); // will populate the merchants spinner
 		merchantSpinner.setOnItemSelectedListener( new MerchantSpinnerItemSelectedListener( merchantSpinner ) );
 	}
 	
@@ -89,7 +89,7 @@ extends Activity
 					{
 						public void run()
 						{
-							FirebaseHelper.addMerchantsListener(  merchantName ) ;
+							FirebaseHelper.addMerchantsListener( merchantName ) ;
 						}
 					} ) ;
 		        }
@@ -138,14 +138,11 @@ extends Activity
 		{
 			String merchantName = ( String ) merchantSpinner.getSelectedItem( ) ;
 			Fragment frag = getFragmentManager( ).findFragmentById( android.R.id.content ) ;
-			if( frag instanceof BeaconsFragment )
+			if( frag instanceof MerchantListener )
 			{
-				BeaconsFragment beaconFrag = ( BeaconsFragment ) frag ;
-				if( merchantSpinner != null && beaconFrag != null )
-					beaconFrag.setMerchant( merchantName ) ;
+				MerchantListener listener = ( MerchantListener ) frag ;
+				listener.selectedMerchantChanged( merchantName );
 			}
-			else if( BuildConfig.DEBUG )
-				Log.w( Consts.LOG, "Couldn't find the BeaconsFragment for some reason!" ) ;
 		}
 
 		public void onNothingSelected( AdapterView<?> parent ) { } // one merchant should always be selected - hide beacons?

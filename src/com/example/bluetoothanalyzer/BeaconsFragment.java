@@ -13,9 +13,8 @@ import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
-import com.estimote.sdk.Region;
-import com.estimote.sdk.Utils;
 import com.estimote.sdk.BeaconManager.RangingListener;
+import com.estimote.sdk.Region;
 
 /**
  * Fragment to show the list of beacons
@@ -25,17 +24,17 @@ import com.estimote.sdk.BeaconManager.RangingListener;
  */
 public class BeaconsFragment
 extends ListFragment
+implements MerchantListener
 {
 	private static final int REQUEST_ENABLE_BT = 1234 ;
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final com.estimote.sdk.Region ALL_ESTIMOTE_BEACONS = new Region( ESTIMOTE_PROXIMITY_UUID, null, null ) ;
 	private BeaconManager beaconManager = null ;
-	private BluetoothDeviceAdapter deviceAdapter = null ;
 	
 	@Override
 	public void onCreate( Bundle savedInstanceState )
 	{	
-		deviceAdapter = new BluetoothDeviceAdapter( getActivity( ), R.layout.list_mobile ) ;
+		final BluetoothDeviceAdapter deviceAdapter = new BluetoothDeviceAdapter( getActivity( ), R.layout.list_mobile ) ;
 		setListAdapter( deviceAdapter ) ;
 		
 		beaconManager = new BeaconManager( getActivity( ) ) ;
@@ -45,11 +44,11 @@ extends ListFragment
 			@Override
 			public void onBeaconsDiscovered( final Region region, final List<Beacon> beacons )
 			{
-				for( int i = 0 ; i < beacons.size( ) ; i++ )
-				{
-					Beacon beacon = beacons.get( i ) ;
-					if( BuildConfig.DEBUG )
-						Log.d( Consts.LOG, "I see an iBeacon " + Utils.computeAccuracy( beacon ) + " meters away."  ) ;
+//				for( int i = 0 ; i < beacons.size( ) ; i++ )
+//				{
+//					Beacon beacon = beacons.get( i ) ;
+//					if( BuildConfig.DEBUG )
+//						Log.v( Consts.LOG, "I see an iBeacon " + Utils.computeAccuracy( beacon ) + " meters away."  ) ;
 					getActivity( ).runOnUiThread( new Runnable( )
 					{
 						public void run()
@@ -57,16 +56,11 @@ extends ListFragment
 							deviceAdapter.updateBeaconStatus( beacons, region ) ;
 						}
 					} );
-				}
+//				}
 			}
 		} ) ;
 		
 		super.onCreate( savedInstanceState );
-	}
-	
-	public void setMerchant( String merchantName )
-	{
-		deviceAdapter.setMerchant( merchantName ) ;
 	}
 
 	@Override
@@ -152,5 +146,11 @@ extends ListFragment
 	{
 		beaconManager.disconnect( ) ;
 		super.onDestroy( );
+	}
+
+	@Override
+	public void selectedMerchantChanged( String merchantName )
+	{
+		( ( BluetoothDeviceAdapter ) getListAdapter( ) ).setMerchant( merchantName ) ;
 	}
 }
