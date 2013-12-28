@@ -15,6 +15,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 
+/**
+ * A bunch of convenience methods to read and write the Firebase database. Note that while the fb methods don't seem to 
+ * block so you can probably call them on the main UI thread, it's not really documented anywhere so be aware.
+ * 
+ * @author daniellipton
+ *@see https://beacon-test.firebaseio.com/#
+ */
 public class FirebaseHelper
 {
 	/** 
@@ -25,7 +32,9 @@ public class FirebaseHelper
 	
 	private final static String FIREBASE_URL = "https://beacon-test.firebaseio.com/" ;
 	/** parent for all merchants */
-	private final static String MERCHANT_NODE = "merchants" ;
+	private final static String MERCHANTS_NODE = "merchants" ;
+	/** parent for all sequences */
+	private final static String SEQUENCES_NODE = "sequences" ;
 	/** parent for all beacons for this merchant */
 	private final static String BEACONS_NODE = "beacons" ;
 	/** key for key/val hash that goes in a beacon under minor to represent the created timestamp */
@@ -34,6 +43,15 @@ public class FirebaseHelper
 	private final static String MERCHANT_KEY = "merchant" ;
 	/** key for key/val hash that goes in a beacon under minor to represent the beacon's name */
 	private final static String BEACON_NAME_KEY = "name" ;
+	
+	/** key for key/val hash that goes in a sequence under sequence node to represent the sequence's uuid */
+	private final static String UUID_NAME_KEY = "uuid" ;
+	/** key for key/val hash that goes in a sequence under sequence node to represent the sequence's major id */
+	private final static String MAJOR_NAME_KEY = "major" ;
+	/** key for key/val hash that goes in a sequence under sequence node to represent the sequence's minor id */
+	private final static String MINOR_NAME_KEY = "minor" ;
+	/** key for key/val hash that goes in a sequence under sequence node to represent the sequence's proximity */
+	private final static String PROXIMITY_NAME_KEY = "proximity" ;
 	
 	public static Firebase getBeaconNode( Beacon beacon )
 	{
@@ -84,16 +102,44 @@ public class FirebaseHelper
 	public static void addMerchantsListener( ChildEventListener listener )
 	{
 		Firebase fbBaseRef = new Firebase( FIREBASE_URL ) ;
-		fbBaseRef.child( MERCHANT_NODE ).addChildEventListener( listener ) ;
+		fbBaseRef.child( MERCHANTS_NODE ).addChildEventListener( listener ) ;
 	}
 
-	/** Add a */
-	public static void addMerchantsListener( String merchantName )
+	/** Add a merchant to the database */
+	public static void addMerchant( String merchantName )
 	{
 		Firebase fbBaseRef = new Firebase( FIREBASE_URL ) ;
-		Firebase newRef = fbBaseRef.child( MERCHANT_NODE ).push( ) ;
+		Firebase newRef = fbBaseRef.child( MERCHANTS_NODE ).push( ) ;
 		newRef.setValue( merchantName ) ;
 		//TODO add more data and a structure around this, like the added time.
+	}
+	
+	/**
+	 * Adds this sequence to the database. Note that every proximity event must have the same merchant or this 
+	 * will throw an <code>IllegalArgumentException</code>.
+	 * @param sequence
+	 */
+	public static void addSequence( String sequenceName, List<ProximityEvent> sequence )
+	{
+		if( sequence == null || sequence.size( ) == 0 ) return ;
+		
+		Firebase fbBaseRef = new Firebase( FIREBASE_URL ) ;
+		Firebase seqRef = fbBaseRef.child( SEQUENCES_NODE ) ;
+		String merchant = sequence.get( 0 ).getBeacon( ).getMerchant( ) ;
+		Firebase sequenceRef = seqRef.child( merchant ).child( sequenceName ) ;
+		for( int i = 0 ; i < sequence.size( ) ; i++ )
+		{
+			ProximityEvent evt = sequence.get( i ) ;
+			if( !evt.getBeacon( ).getMerchant( ).equals( merchant ) )
+				throw new IllegalArgumentException( "Sequence passed with different merchants. Make sure all ProximityEvents have the same merchant." ) ;
+			Firebase evtRef = sequenceRef.push( ) ;
+			Map<String, Object> evtMap = new HashMap<String, Object>( ) ;
+			evtMap.put( UUID_NAME_KEY, evt.getBeacon( ).getUUID( ) ) ;
+			evtMap.put( MAJOR_NAME_KEY, evt.getBeacon( ).getMajor( ) ) ;
+			evtMap.put( MINOR_NAME_KEY, evt.getBeacon( ).getMinor( ) ) ;
+			evtMap.put( PROXIMITY_NAME_KEY, evt.getProximity( ) ) ;
+			evtRef.setValue( evtMap, i ) ;
+		}
 	}
 	
 	/**

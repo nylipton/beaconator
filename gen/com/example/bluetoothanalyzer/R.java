@@ -177,48 +177,59 @@ containing a value of this type.
         public static final int activity_vertical_margin=0x7f080001;
     }
     public static final class drawable {
-        public static final int common_signin_btn_icon_dark=0x7f020000;
-        public static final int common_signin_btn_icon_disabled_dark=0x7f020001;
-        public static final int common_signin_btn_icon_disabled_focus_dark=0x7f020002;
-        public static final int common_signin_btn_icon_disabled_focus_light=0x7f020003;
-        public static final int common_signin_btn_icon_disabled_light=0x7f020004;
-        public static final int common_signin_btn_icon_focus_dark=0x7f020005;
-        public static final int common_signin_btn_icon_focus_light=0x7f020006;
-        public static final int common_signin_btn_icon_light=0x7f020007;
-        public static final int common_signin_btn_icon_normal_dark=0x7f020008;
-        public static final int common_signin_btn_icon_normal_light=0x7f020009;
-        public static final int common_signin_btn_icon_pressed_dark=0x7f02000a;
-        public static final int common_signin_btn_icon_pressed_light=0x7f02000b;
-        public static final int common_signin_btn_text_dark=0x7f02000c;
-        public static final int common_signin_btn_text_disabled_dark=0x7f02000d;
-        public static final int common_signin_btn_text_disabled_focus_dark=0x7f02000e;
-        public static final int common_signin_btn_text_disabled_focus_light=0x7f02000f;
-        public static final int common_signin_btn_text_disabled_light=0x7f020010;
-        public static final int common_signin_btn_text_focus_dark=0x7f020011;
-        public static final int common_signin_btn_text_focus_light=0x7f020012;
-        public static final int common_signin_btn_text_light=0x7f020013;
-        public static final int common_signin_btn_text_normal_dark=0x7f020014;
-        public static final int common_signin_btn_text_normal_light=0x7f020015;
-        public static final int common_signin_btn_text_pressed_dark=0x7f020016;
-        public static final int common_signin_btn_text_pressed_light=0x7f020017;
-        public static final int ic_action_add_merchant=0x7f020018;
-        public static final int ic_launcher=0x7f020019;
-        public static final int ic_plusone_medium_off_client=0x7f02001a;
-        public static final int ic_plusone_small_off_client=0x7f02001b;
-        public static final int ic_plusone_standard_off_client=0x7f02001c;
-        public static final int ic_plusone_tall_off_client=0x7f02001d;
+        public static final int border=0x7f020000;
+        public static final int common_signin_btn_icon_dark=0x7f020001;
+        public static final int common_signin_btn_icon_disabled_dark=0x7f020002;
+        public static final int common_signin_btn_icon_disabled_focus_dark=0x7f020003;
+        public static final int common_signin_btn_icon_disabled_focus_light=0x7f020004;
+        public static final int common_signin_btn_icon_disabled_light=0x7f020005;
+        public static final int common_signin_btn_icon_focus_dark=0x7f020006;
+        public static final int common_signin_btn_icon_focus_light=0x7f020007;
+        public static final int common_signin_btn_icon_light=0x7f020008;
+        public static final int common_signin_btn_icon_normal_dark=0x7f020009;
+        public static final int common_signin_btn_icon_normal_light=0x7f02000a;
+        public static final int common_signin_btn_icon_pressed_dark=0x7f02000b;
+        public static final int common_signin_btn_icon_pressed_light=0x7f02000c;
+        public static final int common_signin_btn_text_dark=0x7f02000d;
+        public static final int common_signin_btn_text_disabled_dark=0x7f02000e;
+        public static final int common_signin_btn_text_disabled_focus_dark=0x7f02000f;
+        public static final int common_signin_btn_text_disabled_focus_light=0x7f020010;
+        public static final int common_signin_btn_text_disabled_light=0x7f020011;
+        public static final int common_signin_btn_text_focus_dark=0x7f020012;
+        public static final int common_signin_btn_text_focus_light=0x7f020013;
+        public static final int common_signin_btn_text_light=0x7f020014;
+        public static final int common_signin_btn_text_normal_dark=0x7f020015;
+        public static final int common_signin_btn_text_normal_light=0x7f020016;
+        public static final int common_signin_btn_text_pressed_dark=0x7f020017;
+        public static final int common_signin_btn_text_pressed_light=0x7f020018;
+        public static final int ic_action_add_merchant=0x7f020019;
+        public static final int ic_launcher=0x7f02001a;
+        public static final int ic_plusone_medium_off_client=0x7f02001b;
+        public static final int ic_plusone_small_off_client=0x7f02001c;
+        public static final int ic_plusone_standard_off_client=0x7f02001d;
+        public static final int ic_plusone_tall_off_client=0x7f02001e;
     }
     public static final class id {
-        public static final int beaconButton=0x7f050008;
-        public static final int device_details=0x7f050007;
-        public static final int device_name=0x7f050006;
+        public static final int beaconButton=0x7f050009;
+        public static final int beaconDetails=0x7f050010;
+        public static final int beaconName=0x7f05000f;
+        public static final int beaconNameDialogField=0x7f050006;
+        public static final int device_details=0x7f050008;
+        public static final int device_name=0x7f050007;
+        public static final int farBtn=0x7f050013;
         public static final int hybrid=0x7f050004;
+        public static final int immediateBtn=0x7f050012;
         public static final int merchantSpinner=0x7f050005;
-        public static final int merchantSpinnerDialogField=0x7f050009;
-        public static final int newMerchantMenuItem=0x7f05000a;
+        public static final int merchantSpinnerDialogField=0x7f05000a;
+        public static final int nearBtn=0x7f050011;
+        public static final int newButton=0x7f05000d;
+        public static final int newMerchantMenuItem=0x7f050014;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
         public static final int satellite=0x7f050002;
+        public static final int saveButton=0x7f05000c;
+        public static final int sequenceDesc=0x7f05000e;
+        public static final int sequenceNameField=0x7f05000b;
         public static final int terrain=0x7f050003;
     }
     public static final class integer {
@@ -227,8 +238,11 @@ containing a value of this type.
     public static final class layout {
         public static final int actionbar=0x7f030000;
         public static final int activity_main=0x7f030001;
-        public static final int list_mobile=0x7f030002;
-        public static final int merchant_entry_dialog=0x7f030003;
+        public static final int beacon_name_entry_dialog=0x7f030002;
+        public static final int list_mobile=0x7f030003;
+        public static final int merchant_entry_dialog=0x7f030004;
+        public static final int sequence_frag=0x7f030005;
+        public static final int sequence_list_item=0x7f030006;
     }
     public static final class menu {
         public static final int main_activity_actions=0x7f0a0000;
@@ -262,6 +276,8 @@ containing a value of this type.
         [CHAR LIMIT=70] 
          */
         public static final int auth_client_using_bad_version_title=0x7f060014;
+        public static final int beaconNameDialogTitle=0x7f060030;
+        public static final int beaconNameEntryHint=0x7f06002f;
         public static final int cancel=0x7f060028;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
@@ -335,14 +351,22 @@ containing a value of this type.
          */
         public static final int common_signin_button_text_long=0x7f060013;
         public static final int empty_msg=0x7f060020;
+        public static final int farBtnTitle=0x7f060034;
+        public static final int immediateBtnTitle=0x7f060035;
         public static final int loadingButtonText=0x7f060022;
         public static final int menu_legalnotices=0x7f06001d;
         public static final int merchantDialogTitle=0x7f060029;
         public static final int merchantEntryHint=0x7f06002a;
         public static final int merchantLabelText=0x7f060024;
+        public static final int nearBtnTitle=0x7f060036;
+        public static final int newBtnTitle=0x7f060033;
         public static final int newMerchantMenuItemName=0x7f06002b;
         public static final int newMerchantMessage=0x7f060026;
+        public static final int newSequenceToast=0x7f060038;
         public static final int removeButtonText=0x7f060023;
+        public static final int saveBtnTitle=0x7f060032;
+        public static final int saveSequenceToast=0x7f060037;
+        public static final int sequenceNameEntryHint=0x7f060031;
         public static final int start_scanning=0x7f06001e;
         public static final int stop_scanning=0x7f06001f;
         public static final int tab_beacons=0x7f06002c;

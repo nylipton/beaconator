@@ -89,4 +89,19 @@ implements Device
 	{
 		return merchant ;
 	}
+	
+	public String getUUID( )
+	{
+		return uuid ;
+	}
+	
+	public int getMajor( )
+	{
+		return major ;
+	}
+	
+	public int getMinor( )
+	{
+		return minor ;
+	}
 }

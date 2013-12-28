@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ListFragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,6 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.view.View.OnFocusChangeListener; 
+import android.view.inputmethod.InputMethodManager;
 
 /**
  * Fragment that will allow users to create new sequences of beacon events (regions) which can be tied to notifications
@@ -62,6 +66,18 @@ implements MerchantListener
 				determineSaveNewButtonStates( ) ;
 			}
 		} );
+		sequenceNameTV.setOnFocusChangeListener( new OnFocusChangeListener( )
+		{ // this is so the keyboard goes away after the edittext loses focus - shouldn't it do this by default?
+			public void onFocusChange( View v, boolean hasFocus )
+			{
+				if( v.getId( ) == R.id.sequenceNameField && !hasFocus )
+				{
+					InputMethodManager imm =  (InputMethodManager) getActivity( ).getSystemService( Context.INPUT_METHOD_SERVICE);
+		            imm.hideSoftInputFromWindow( v.getWindowToken( ), 0 ) ;
+				}
+			}
+		} ) ;
+		
 		return view ;
 	}
 	
@@ -69,9 +85,11 @@ implements MerchantListener
 	protected void determineSaveNewButtonStates( )
 	{
 		Editable s = sequenceNameTV.getText( ) ;
-		boolean enable = ( s.length( ) > 0 ) && ( proximityEvents.size( ) > 0 ) ;
-		saveButton.setEnabled( enable ) ;
-		newButton.setEnabled( enable ) ;
+		boolean saveEnable = ( s.length( ) > 0 ) && ( proximityEvents.size( ) > 0 ) ;
+		saveButton.setEnabled( saveEnable ) ;
+		
+		boolean newEnable = ( s.length( ) > 0 ) || ( proximityEvents.size( ) > 0 ) ;
+		newButton.setEnabled( newEnable ) ;
 	}
 	
 	@Override
@@ -94,7 +112,17 @@ implements MerchantListener
 	
 	public void saveSequence( )
 	{
+		String sequenceName = sequenceNameTV.getText( ).toString( ) ;
+		FirebaseHelper.addSequence( sequenceName, proximityEvents ) ;
 		
+		getActivity( ).runOnUiThread( new Runnable( )
+		{
+			public void run()
+			{
+				Toast toast = Toast.makeText( getActivity( ), R.string.saveSequenceToast, Toast.LENGTH_SHORT ) ;
+				toast.show( ) ;
+			}
+		} ) ;
 	}
 	
 	public void newSequence( )
@@ -107,6 +135,10 @@ implements MerchantListener
 				sequenceNameTV.setText( "" ) ;
 				proximityEvents.clear( ) ;
 				sequenceTV.setVisibility( View.INVISIBLE );
+				determineSaveNewButtonStates( ) ;
+				
+				Toast toast = Toast.makeText( getActivity( ), R.string.newSequenceToast, Toast.LENGTH_SHORT ) ;
+				toast.show( ) ;
 			}
 		} ) ;
 	}

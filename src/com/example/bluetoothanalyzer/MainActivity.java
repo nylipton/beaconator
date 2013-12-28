@@ -89,7 +89,7 @@ extends Activity
 					{
 						public void run()
 						{
-							FirebaseHelper.addMerchantsListener( merchantName ) ;
+							FirebaseHelper.addMerchant( merchantName ) ;
 						}
 					} ) ;
 		        }

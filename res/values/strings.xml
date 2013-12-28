@@ -33,4 +33,6 @@
 	<string name="farBtnTitle">Far</string>
 	<string name="immediateBtnTitle">Immediate</string>
 	<string name="nearBtnTitle">Near</string>
+	<string name="saveSequenceToast">Sequence saved</string>
+	<string name="newSequenceToast">Cleared. Ready for new sequence</string>
 </resources>
