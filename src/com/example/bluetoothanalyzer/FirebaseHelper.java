@@ -52,6 +52,8 @@ public class FirebaseHelper
 	private final static String MINOR_NAME_KEY = "minor" ;
 	/** key for key/val hash that goes in a sequence under sequence node to represent the sequence's proximity */
 	private final static String PROXIMITY_NAME_KEY = "proximity" ;
+	/** child under a sequence name and parent to the random id nodes for the events */
+	private final static String EVENTS_NODE = "events" ;
 	
 	public static Firebase getBeaconNode( Beacon beacon )
 	{
@@ -132,7 +134,7 @@ public class FirebaseHelper
 			ProximityEvent evt = sequence.get( i ) ;
 			if( !evt.getBeacon( ).getMerchant( ).equals( merchant ) )
 				throw new IllegalArgumentException( "Sequence passed with different merchants. Make sure all ProximityEvents have the same merchant." ) ;
-			Firebase evtRef = sequenceRef.push( ) ;
+			Firebase evtRef = sequenceRef.child( EVENTS_NODE ).push( ) ;
 			Map<String, Object> evtMap = new HashMap<String, Object>( ) ;
 			evtMap.put( UUID_NAME_KEY, evt.getBeacon( ).getUUID( ) ) ;
 			evtMap.put( MAJOR_NAME_KEY, evt.getBeacon( ).getMajor( ) ) ;
@@ -140,6 +142,13 @@ public class FirebaseHelper
 			evtMap.put( PROXIMITY_NAME_KEY, evt.getProximity( ) ) ;
 			evtRef.setValue( evtMap, i ) ;
 		}
+	}
+	
+	/** Adds a listener for all of the sequences in the database */
+	public static void addSequenceParentListener( String merchant, ChildEventListener listener )
+	{
+		Firebase fbRef = new Firebase( FIREBASE_URL ).child( SEQUENCES_NODE ).child( merchant ) ;
+		fbRef.addChildEventListener( listener ) ;
 	}
 	
 	/**

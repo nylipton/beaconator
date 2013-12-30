@@ -49,7 +49,7 @@ extends Activity
 		actionBar.setNavigationMode( ActionBar.NAVIGATION_MODE_TABS ) ;
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_beacons ).setTabListener( new FragmentTabListener<BeaconsFragment>( this, getText( R.string.tab_beacons ).toString( ), BeaconsFragment.class ) ) ) ;
 		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_events ).setTabListener( new FragmentTabListener<SequencesFragment>( this, getText( R.string.tab_events ).toString( ), SequencesFragment.class ) ) ) ;
-		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_notifications ).setTabListener( new FragmentTabListener<DummySectionFragment>( this, getText( R.string.tab_notifications ).toString( ), DummySectionFragment.class ) ) ) ;
+		actionBar.addTab( actionBar.newTab( ).setText( R.string.tab_notifications ).setTabListener( new FragmentTabListener<NotificationsFragment>( this, getText( R.string.tab_notifications ).toString( ), NotificationsFragment.class ) ) ) ;
 
 		final Spinner merchantSpinner = ( Spinner ) actionBar.getCustomView( ).findViewById( R.id.merchantSpinner ) ;
 		merchantSpinnerAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item ) ;

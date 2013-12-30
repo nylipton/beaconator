@@ -43,7 +43,8 @@ implements ChildEventListener
 	public void onChildAdded( DataSnapshot ds, String previousChildName )
 	{
 		final String name = ds.getValue( String.class ) ;
-		Log.i( Consts.LOG, "added a new merchant: " + name ) ;
+		if( BuildConfig.DEBUG )
+			Log.d( Consts.LOG, "added a new merchant: " + name ) ;
 		this.mainActivity.runOnUiThread( new Runnable( )
 		{
 			public void run()

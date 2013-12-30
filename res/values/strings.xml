@@ -14,25 +14,35 @@
     <string name="merchantLabelText">Merchant:</string>
     <string name="addMerchantButton">+</string>
     <string name="newMerchantMessage">new merchant:</string>
-	<string name="add">Add</string>
-	<string name="cancel">Cancel</string>
-	<string name="merchantDialogTitle">Enter Merchant</string>
-	<string name="merchantEntryHint">new merchant name</string>
-	<string name="newMerchantMenuItemName">add merchant</string>
-	
-	<string name="tab_beacons">beacons</string>
-	<string name="tab_events">sequences</string>
-	<string name="tab_notifications">notifications</string>
-	
-	<string name="beaconNameEntryHint">beacon name</string>
-	<string name="beaconNameDialogTitle">Enter Beacon Name</string>
-	
-	<string name="sequenceNameEntryHint">sequence name</string>
-	<string name="saveBtnTitle">Save</string>
-	<string name="newBtnTitle">New</string>
-	<string name="farBtnTitle">Far</string>
-	<string name="immediateBtnTitle">Immediate</string>
-	<string name="nearBtnTitle">Near</string>
-	<string name="saveSequenceToast">Sequence saved</string>
-	<string name="newSequenceToast">Cleared. Ready for new sequence</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="merchantDialogTitle">Enter Merchant</string>
+    <string name="merchantEntryHint">new merchant name</string>
+    <string name="newMerchantMenuItemName">add merchant</string>
+    <string name="tab_beacons">beacons</string>
+    <string name="tab_events">sequences</string>
+    <string name="tab_notifications">notifications</string>
+    <string name="beaconNameEntryHint">beacon name</string>
+    <string name="beaconNameDialogTitle">Enter Beacon Name</string>
+    <string name="sequenceNameEntryHint">sequence name</string>
+    <string name="saveBtnTitle">Save</string>
+    <string name="newBtnTitle">New</string>
+    <string name="farBtnTitle">Far</string>
+    <string name="immediateBtnTitle">Immediate</string>
+    <string name="nearBtnTitle">Near</string>
+    <string name="saveSequenceToast">Sequence saved</string>
+    <string name="newSequenceToast">Cleared. Ready for new sequence</string>
+    <string name="notificationNameFieldTitle">Notification name</string>
+    <string name="notificationTitleFieldTitle">Title</string>
+    <string name="notificationMessageFieldTitle">Message</string>
+    <string name="notificationSequenceFieldTitle">Sequence</string>
+    <string name="notificationLinkFieldTitle">link</string>
+    <string name="notificationNewLink">New notification</string>
+    <string name="createNotification">Create</string>
+    <string name="title_activity_create_notification">CreateNotificationActivity</string>
+    <string name="notificationWord">notification</string>
+    <string name="notificationCreateButton">Create</string>
+    <string name="MERCHANT_KEY">com.exmple.bluetoothanalyzer.MERCHANT</string>
+    <string name="blank_field_error">cannot be blank</string>
+
 </resources>
