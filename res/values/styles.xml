@@ -16,5 +16,41 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
+    
+    
+        <!-- Notification content styles -->
+    <style name="NotificationEventContent">
+        <item name="android:textColor">#999999</item>
+        <item name="android:textSize">14dp</item>
+    </style>
+    <style name="NotificationEventContent.Title">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">18dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="NotificationEventContent.Line2">
+        <item name="android:textSize">12dp</item>
+    </style>
+    <style name="NotificationEventContent.Info">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">#999999</item>
+    </style>
+    <style name="NotificationEventContent.Time">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">#999999</item>
+    </style>
+    <style name="NotificationEventContent.Emphasis">
+        <item name="android:textColor">#CCCCCC</item>
+    </style>
+	<style name="NotificationTitle">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">18dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="NotificationLine2">
+        <item name="android:textSize">12dp</item>
+    </style>
 
 </resources>
