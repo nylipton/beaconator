@@ -12,6 +12,7 @@ import com.estimote.sdk.Beacon;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 
@@ -54,6 +55,19 @@ public class FirebaseHelper
 	private final static String PROXIMITY_NAME_KEY = "proximity" ;
 	/** child under a sequence name and parent to the random id nodes for the events */
 	private final static String EVENTS_NODE = "events" ;
+	
+	/** key for key/val hash that goes in a notification to represent the notification's title */
+	private final static String TITLE_KEY = "title" ;
+	/** key for key/val hash that goes in a notification to represent the notification's message */
+	private final static String MESSAGE_KEY = "message" ;
+	/** key for key/val hash that goes in a notification to represent the notification's link  (i.e. where clicking the link goes) */
+	private final static String LINK_KEY = "link" ;
+	/** key for key/val hash that goes in a notification to represent the notification's large icon URL */
+	private final static String LARGE_ICON_URL_KEY = "largeIconURL" ;
+	/** child under a sequence name and parent to the sequence name. this introduces data integrity issues */
+	private final static String SEQ_NAME_KEY = "sequenceName" ;
+	/** child under a sequence name and parent to the notification name */
+	private final static String NOTIF_NODE = "notifications" ;
 	
 	public static Firebase getBeaconNode( Beacon beacon )
 	{
@@ -181,5 +195,85 @@ public class FirebaseHelper
 		}
 		
 		return beaconsList ;
+	}
+	
+	public static NotificationInfo convertDataSnapshotToNotification( DataSnapshot ds )
+	{
+		GenericTypeIndicator<Map<String, String>> t = new GenericTypeIndicator<Map<String, String>>( ) { } ;
+		Map<String, String> valMap = ds.getValue( t ) ;
+		NotificationInfo notif = new NotificationInfo( ) ;
+		notif.largeIconURL = valMap.get( LARGE_ICON_URL_KEY ) ;
+		notif.linkURL = valMap.get( LINK_KEY ) ;
+		notif.merchant = valMap.get( MERCHANT_KEY ) ;
+		notif.message = valMap.get( MESSAGE_KEY ) ;
+		notif.name = ds.getName( ) ;
+		notif.sequenceName = valMap.get( SEQ_NAME_KEY ) ;
+		notif.title = valMap.get( TITLE_KEY ) ;
+		return notif ;
+	}
+
+	/**
+	 * Saves this notification into the database 
+	 */
+	public static void addNotification( NotificationInfo notif )
+	{
+		Firebase fbBaseRef = new Firebase( FIREBASE_URL ) ; 
+		Firebase fbNotifRef = fbBaseRef.child( SEQUENCES_NODE ).child( notif.merchant ).child( notif.sequenceName ).child( NOTIF_NODE ).child( notif.name ) ;
+		Map<String, Object> vals = new HashMap<String, Object>( ) ;
+		vals.put( TITLE_KEY, notif.title ) ;
+		vals.put( MESSAGE_KEY, notif.message ) ;
+		vals.put( LINK_KEY, notif.linkURL ) ;
+		vals.put( LARGE_ICON_URL_KEY, notif.largeIconURL ) ;
+		vals.put( SEQ_NAME_KEY, notif.sequenceName ) ;
+		fbNotifRef.setValue( vals ) ;
+	}
+	
+	/** Adds a listener for all of the notifications in the database for a specific merchant */
+	public static void addNotificationParentListener( String merchant, ChildEventListener listener )
+	{
+		Firebase fbRef = new Firebase( FIREBASE_URL ).child( SEQUENCES_NODE ).child( merchant ) ;
+		fbRef.addChildEventListener( new SequenceChildNodeListener( listener ) ) ;
+	}
+	
+	/** These will be called when "sequences"->merchant->seq name is found */
+	static class SequenceChildNodeListener
+	implements ChildEventListener
+	{
+		ChildEventListener notificationsListener ;
+		
+		SequenceChildNodeListener( ChildEventListener notificationsListener )
+		{
+			this.notificationsListener = notificationsListener ;
+		}
+		
+		@Override
+		public void onCancelled( FirebaseError arg0 )
+		{
+			notificationsListener.onCancelled( arg0 ) ; 
+		}
+
+		@Override
+		public void onChildAdded( DataSnapshot ds, String arg1 )
+		{
+			notificationsListener.onChildAdded( ds.child( NOTIF_NODE ), arg1 ); 
+		}
+
+		@Override
+		public void onChildChanged( DataSnapshot ds, String arg1 )
+		{
+			notificationsListener.onChildChanged( ds.child( NOTIF_NODE ), arg1 ); 
+		}
+
+		@Override
+		public void onChildMoved( DataSnapshot ds, String arg1 )
+		{
+			notificationsListener.onChildMoved( ds.child( NOTIF_NODE ), arg1 ); 
+		}
+
+		@Override
+		public void onChildRemoved( DataSnapshot ds )
+		{
+			notificationsListener.onChildRemoved( ds.child( NOTIF_NODE ) ); 
+		}
 	}
 }

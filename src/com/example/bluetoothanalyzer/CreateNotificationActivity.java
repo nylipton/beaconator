@@ -1,17 +1,6 @@
 package com.example.bluetoothanalyzer;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -21,12 +10,17 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class CreateNotificationActivity extends Activity
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+
+public class CreateNotificationActivity 
+extends Activity
 {
-	private static int notificationId = 4783516 ;
 	private String merchant ;
 	private EditText nameField, titleField, messageField ;
 	private ArrayAdapter<String> sequenceSpinnerAdapter ;
+	private Spinner sequenceSpinner ;
 	
 	@Override
 	protected void onCreate( Bundle savedInstanceState )
@@ -40,7 +34,7 @@ public class CreateNotificationActivity extends Activity
 		messageField = ( EditText ) findViewById( R.id.notificationMessageField ) ;
 		titleField = ( EditText ) findViewById( R.id.notificationTitleField ) ;
 		nameField = ( EditText ) findViewById( R.id.notificationNameField ) ;
-		Spinner sequenceSpinner = ( Spinner ) findViewById( R.id.notificationSequencePicker ) ;
+		sequenceSpinner = ( Spinner ) findViewById( R.id.notificationSequencePicker ) ;
 		sequenceSpinnerAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item ) ;
 		sequenceSpinnerAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item ) ;
 		sequenceSpinner.setAdapter( sequenceSpinnerAdapter ) ;
@@ -67,20 +61,19 @@ public class CreateNotificationActivity extends Activity
 			messageField.setError( getText( R.string.blank_field_error ) );
 		else
 		{
-			Intent resultIntent = new Intent( Intent.ACTION_VIEW, Uri.parse( "https://www.google.com/search?q=" + merchant ) ) ;
-			TaskStackBuilder tsb = TaskStackBuilder.create( this ) ;
-			tsb.addNextIntent( resultIntent ) ;
-			PendingIntent resultPendingIntent = tsb.getPendingIntent( 0, PendingIntent.FLAG_UPDATE_CURRENT ) ;
+			NotificationInfo notif = new NotificationInfo( ) ;
+			notif.largeIconURL = "http://www.storebrandsdecisions.com/upload/images/news_images/cvs/cvs_logo_web150.jpg" ;
+			notif.title = titleField.getText( ).toString( ) ;
+			notif.name = nameField.getText( ).toString( ) ;
+			notif.message = messageField.getText( ).toString( ) ;
+			notif.linkURL = "https://www.google.com/search?q=" + merchant ;
+			notif.merchant = merchant ;
+			notif.sequenceName = ( String ) sequenceSpinner.getSelectedItem( ) ;
+//			new DisplayNotificationTask( this ).execute( notif ) ;
 			
-			Notification.Builder builder =  new Notification.Builder( this )
-			.setContentTitle( titleField.getText( ) )
-			.setContentText( messageField.getText( ) )
-			.setSmallIcon( R.drawable.ic_launcher )
-			.setContentIntent( resultPendingIntent ) ;
-			NotificationManager mNotificationManager = ( NotificationManager ) getSystemService(Context.NOTIFICATION_SERVICE) ;
-			mNotificationManager.notify( notificationId, builder.build( ) ) ;
-				
-//			FirebaseHelper.addNotification( )
+			FirebaseHelper.addNotification( notif ) ; // save it in the database, probably should be off the UI thread
+			finish( ) ;
+			
 		}
 	}
 	
