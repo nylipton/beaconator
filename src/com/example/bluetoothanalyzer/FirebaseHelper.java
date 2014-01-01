@@ -84,6 +84,14 @@ public class FirebaseHelper
 		fbBeaconsRef.addChildEventListener( listener ) ;
 	}
 	
+	/** Will add a listener to get the values of this beacon */
+	public static void addBeaconValueListener( String uuid, int major, int minor, ValueEventListener listener )
+	{
+		Firebase fbRef = new Firebase( FIREBASE_URL ) ;
+		fbRef = fbRef.child( BEACONS_NODE ).child( uuid ).child( Integer.toString( major ) ).child( Integer.toString( minor ) ) ;
+		fbRef.addValueEventListener( listener ) ;
+	}
+	
 	/**
 	 * Sticks the beacon into Firebase as <code>beacons/proximityUUID/major/minor</code> with the value of a timestamp and the merchant
 	 * 
@@ -225,6 +233,7 @@ public class FirebaseHelper
 		vals.put( LINK_KEY, notif.linkURL ) ;
 		vals.put( LARGE_ICON_URL_KEY, notif.largeIconURL ) ;
 		vals.put( SEQ_NAME_KEY, notif.sequenceName ) ;
+		vals.put( CREATED_KEY, dateFormat.format( new Date( ) ) ) ;
 		fbNotifRef.setValue( vals ) ;
 	}
 	
@@ -275,5 +284,44 @@ public class FirebaseHelper
 		{
 			notificationsListener.onChildRemoved( ds.child( NOTIF_NODE ) ); 
 		}
+	}
+
+	/**
+	 * Adds a listener for the events under a sequence
+	 * 
+	 * @param snapshot	The snapshot returned by {@link FirebaseHelper#addSequenceParentListener(String, ChildEventListener)}
+	 * @param eventFBListener
+	 * @see FirebaseHelper#addSequenceParentListener(String, ChildEventListener)
+	 */
+	public static void addEventsListener( DataSnapshot snapshot, ChildEventListener listener )
+	{
+		snapshot.child( EVENTS_NODE ).getRef( ).addChildEventListener( listener ) ;
+	}
+
+	/**
+	 * @see	FirebaseHelper#addSequenceParentListener(String, ChildEventListener)
+	 */
+	public static ProximityEvent convertDataSnapshotToEvent( String merchant, DataSnapshot snapshot )
+	{
+		GenericTypeIndicator<Map<String, Object>> t = new GenericTypeIndicator<Map<String, Object>>( ) { } ;
+		Map<String, Object> userData = snapshot.getValue( t ) ;
+		String uuid = ( String ) userData.get( UUID_NAME_KEY ) ;
+		int major = ( ( Integer ) userData.get( MAJOR_NAME_KEY ) ).intValue( ) ;
+		int minor = ( ( Integer ) userData.get( MINOR_NAME_KEY ) ).intValue( ) ;
+		
+		SavedBeaconDevice beacon = new SavedBeaconDevice( uuid, major, minor, merchant, null ) ;
+		ProximityEvent.Proximity proximity =  ProximityEvent.Proximity.valueOf( ( String ) userData.get( PROXIMITY_NAME_KEY )) ;
+		ProximityEvent evt = new ProximityEvent( beacon, proximity ) ;
+		return evt ;
+	}
+
+	public static String getBeaconName( DataSnapshot ds )
+	{ 
+		Object val = ds.getValue( ) ;
+		if( val != null )
+		{
+			val = ( ( Map<String, Object> ) val ).get( BEACON_NAME_KEY ) ;
+		}
+		return ( String ) val ;
 	}
 }

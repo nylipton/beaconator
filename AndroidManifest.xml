@@ -45,6 +45,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.bluetoothanalyzer.MainActivity" />
         </activity>
+        
+        <activity
+            android:name="com.example.bluetoothanalyzer.CreateSequenceActivity"
+            android:label="@string/title_activity_create_sequence"
+            android:parentActivityName="com.example.bluetoothanalyzer.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.bluetoothanalyzer.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

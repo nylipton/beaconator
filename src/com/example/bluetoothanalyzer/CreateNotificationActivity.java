@@ -99,8 +99,6 @@ extends Activity
 	class SequenceListener
 	implements ChildEventListener
 	{
-
-		
 		@Override
 		public void onCancelled( FirebaseError arg0 )
 		{

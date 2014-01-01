@@ -2,8 +2,8 @@ package com.example.bluetoothanalyzer;
 
 public class ProximityEvent
 {
-	SavedBeaconDevice beacon ;
-	Proximity prox ;
+	private SavedBeaconDevice beacon ;
+	private Proximity prox ;
 	
 	public enum Proximity 
 	{

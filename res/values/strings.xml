@@ -24,9 +24,10 @@
     <string name="tab_notifications">notifications</string>
     <string name="beaconNameEntryHint">beacon name</string>
     <string name="beaconNameDialogTitle">Enter Beacon Name</string>
+    <string name="title_activity_create_sequence">CreateSequenceActivity</string>
     <string name="sequenceNameEntryHint">sequence name</string>
     <string name="saveBtnTitle">Save</string>
-    <string name="newBtnTitle">New</string>
+    <string name="newBtnTitle">Clear</string>
     <string name="farBtnTitle">Far</string>
     <string name="immediateBtnTitle">Immediate</string>
     <string name="nearBtnTitle">Near</string>
@@ -44,5 +45,5 @@
     <string name="notificationCreateButton">Create</string>
     <string name="MERCHANT_KEY">com.exmple.bluetoothanalyzer.MERCHANT</string>
     <string name="blank_field_error">cannot be blank</string>
-
+    <string name="sequencesNewLink">New sequence</string>
 </resources>

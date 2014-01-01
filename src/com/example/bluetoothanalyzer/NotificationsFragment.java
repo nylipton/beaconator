@@ -39,16 +39,16 @@ implements MerchantListener
 	public void onCreate( Bundle savedInstanceState )
 	{
 		adapter = new NotificationsAdapater( getActivity( ), R.layout.notification_list_item ) ;
-//		ArrayAdapter<Notification> adapter = new ArrayAdapter<Notification>( getActivity(), android.R.layout.list_content ) ;
 		setListAdapter( adapter ) ;
 		
 		super.onCreate( savedInstanceState ) ;
 	}
+	
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState )
 	{
 		View view = inflater.inflate( R.layout.notifications_frag, container, false ) ;
-		Button newNotificationTV = ( Button ) view.findViewById( R.id.notificationLabel ) ;
+		Button newNotificationTV = ( Button ) view.findViewById( R.id.newButton ) ;
 		newNotificationTV.setOnClickListener( new OnClickListener( )
 		{
 			public void onClick( View v )

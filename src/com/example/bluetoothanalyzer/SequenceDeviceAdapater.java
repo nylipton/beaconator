@@ -21,6 +21,11 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 
+/**
+ * Lists the iBeacons available from this merchant that can be added to a new sequence
+ * @author daniellipton
+ *
+ */
 public class SequenceDeviceAdapater 
 extends ArrayAdapter<SavedBeaconDevice>
 {
@@ -28,9 +33,9 @@ extends ArrayAdapter<SavedBeaconDevice>
 	private Map<String, List<SavedBeaconDevice>> beaconMap ;
 	private Semaphore merchantSemaphore = new Semaphore( 1 ) ;
 	private String selectedMerchant = null ; 
-	private SequencesFragment sequencesFragment ; //TODO is it worth abstracting this so there's a listener for new ProximityEvents instead of directly calling the SequencesFragment?
+	private CreateSequenceActivity sequencesFragment ; //TODO is it worth abstracting this so there's a listener for new ProximityEvents instead of directly calling the SequencesFragment?
 	
-	public SequenceDeviceAdapater( Context context, int resource, SequencesFragment fragment )
+	public SequenceDeviceAdapater( Context context, int resource, CreateSequenceActivity fragment )
 	{
 		super( context, resource );
 		this.sequencesFragment = fragment ;

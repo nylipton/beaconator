@@ -108,6 +108,7 @@
                 android:paddingStart="8dp"
                 />
             <ImageView android:id="@+id/notificationSmallIcon"
+                android:contentDescription="@string/app_name"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center"

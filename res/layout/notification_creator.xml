@@ -7,13 +7,15 @@
     android:padding="16dip" >
 
     <TextView 
+        android:labelFor="@+id/notificationNameField"
         android:text="@string/notificationNameFieldTitle"
         android:textSize="16sp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"/>
     <EditText
-        android:id="@+id/notificationNameField"
-        android:textSize="16sp"
+        android:id="@id/notificationNameField"
+        android:inputType="text"
+        android:textSize="16sp" 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -22,12 +24,14 @@
     </EditText>
     
     <TextView 
+        android:labelFor="@+id/notificationTitleField"
         android:text="@string/notificationTitleFieldTitle"
         android:textSize="16sp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"/>
     <EditText
-	    android:id="@+id/notificationTitleField"
+	    android:id="@id/notificationTitleField"
+	    android:inputType="text"
 	    android:textSize="16sp"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
@@ -35,12 +39,14 @@
 	    android:layout_marginBottom="10dip"/>
     
     <TextView 
+        android:labelFor="@+id/notificationMessageField"
         android:text="@string/notificationMessageFieldTitle"
         android:textSize="16sp"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"/>
     <EditText
-        android:id="@+id/notificationMessageField"
+        android:id="@id/notificationMessageField"
+        android:inputType="text"
         android:textSize="16sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
